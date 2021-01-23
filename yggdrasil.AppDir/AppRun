@@ -1,29 +1,16 @@
-#!/bin/sh
-# cd "$(dirname "$0")"
+#!/bin/bash
 SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
 
 export PATH="${HERE}/usr/bin/:${HERE}/usr/sbin/:${HERE}/usr/games/:${HERE}/bin/:${HERE}/sbin/${PATH:+:$PATH}"
-# export PATH="${HERE}/usr/bin/:${HERE}/usr/sbin/:${HERE}/usr/games/:${HERE}/bin/:${HERE}/sbin/${PATH:+:$PATH}"
-# export LD_LIBRARY_PATH="${HERE}/usr/lib/:${HERE}/usr/lib/i386-linux-gnu/:${HERE}/usr/lib/x86_64-linux-gnu/:${HERE}/usr/lib32/:${HERE}/usr/lib64/:${HERE}/lib/:${HERE}/lib/i386-linux-gnu/:${HERE}/lib/x86_64-linux-gnu/:${HERE}/lib32/:${HERE}/lib64/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-# export PYTHONPATH="${HERE}/usr/share/pyshared/${PYTHONPATH:+:$PYTHONPATH}"
-# export XDG_DATA_DIRS="${HERE}/usr/share/${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
-# export PERLLIB="${HERE}/usr/share/perl5/:${HERE}/usr/lib/perl5/${PERLLIB:+:$PERLLIB}"
-# export GSETTINGS_SCHEMA_DIR="${HERE}/usr/share/glib-2.0/schemas/${GSETTINGS_SCHEMA_DIR:+:$GSETTINGS_SCHEMA_DIR}"
-# export QT_PLUGIN_PATH="${HERE}/usr/lib/qt4/plugins/:${HERE}/usr/lib/i386-linux-gnu/qt4/plugins/:${HERE}/usr/lib/x86_64-linux-gnu/qt4/plugins/:${HERE}/usr/lib32/qt4/plugins/:${HERE}/usr/lib64/qt4/plugins/:${HERE}/usr/lib/qt5/plugins/:${HERE}/usr/lib/i386-linux-gnu/qt5/plugins/:${HERE}/usr/lib/x86_64-linux-gnu/qt5/plugins/:${HERE}/usr/lib32/qt5/plugins/:${HERE}/usr/lib64/qt5/plugins/${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
 
-# exec ./generate_config.sh
-# EXEC=$($HERE/usr/bin/yggdrasil -genconf > /tmp/yggdrasil.conf)
-# EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2)
-# # EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2 | cut -d " " -f 1)
-# exec "${EXEC}" "$@"
-# source $HOME/.profile
-# exec "$HERE/usr/bin/yggdrasil -genconf > /tmp/yggdrasil.conf"
-$HERE/usr/bin/yggdrasil -genconf > /tmp/yggdrasil.conf
-sudo sed 's|Peers: \[\]|Peers: \[ \n tcp://46.151.26.194:60575 \n \]|g' -i /tmp/yggdrasil.conf
-$HERE/usr/bin/yggdrasil -useconffile /tmp/yggdrasil.conf
-# SELF_DIR="$(dirname "$(readlink -f "$0")")"
-# cd "$(dirname "$0")"
+get_sudo_password=`bash $HERE/get_sudo_password.sh`
+sudo_password=`echo $get_sudo_password | sed "s|Password : ||g"`
 
-# sudo ./yggdrasilctl getself >> /tmp/yggdrasil_getSelf
-# exec ./run.sh
+test_pass=`echo $sudo_password | sudo -S -s $HERE/check_EUID.sh`
+
+if (( test_pass == 0)) ; then
+    echo $sudo_password | sudo -S -s -u root yggdrasil.AppDir/usr/bin/yggdrasil -genconf > /tmp/yggdrasil.conf
+    echo $sudo_password | sudo -S -s -u root sed 's|Peers: \[\]|Peers: \[ \n tcp://46.151.26.194:60575 \n \]|g' -i /tmp/yggdrasil.conf
+    echo $sudo_password | sudo -S -s -u root yggdrasil.AppDir/usr/bin/yggdrasil -useconffile /tmp/yggdrasil.conf
+fi
