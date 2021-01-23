@@ -1,3 +1,9 @@
+# Vagrant
+.vagrant
+Vagrant/share_data/cache
+.sync
+tmp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
