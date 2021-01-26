@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 import sqlite3
 from datetime import datetime
 
@@ -17,6 +18,8 @@ class User:
         uuid.update(entropy.encode('utf-8'))
         self.uuid = uuid.hexdigest()
         self.ip = ip
+        self.new_card()
+        self.new_database()
 
     def new_database(self):
         conn = sqlite3.connect(f"user/{self.uuid}.db")
@@ -36,6 +39,22 @@ class User:
         cur.execute(f"""INSERT INTO
             contacts(id, nickname, uuid, duid, ip, port, interval, is_paired, is_available)
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);""", self_as_contact)
+        conn.commit()
+        conn.close()
+
+        conn = sqlite3.connect(f"user/dialogs/dialog{self.uuid}.db")
+        cur = conn.cursor()
+        cur.execute(f"""CREATE TABLE IF NOT EXISTS messages(
+                      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                      message TEXT,
+                      hash TEXT,
+                      date TEXT,
+                      status TEXT);
+                   """)
+        row = (0, 'START', "START", str(datetime.now()).encode('utf-8'), "START_MESSAGE")
+        cur.execute(f"""INSERT INTO
+                   messages(id, message, hash, date, status)
+                   VALUES(?, ?, ?, ?, ?);""", row)
         conn.commit()
         conn.close()
 
@@ -80,6 +99,7 @@ class Contact:
             VALUES(?, ?, ?, ?, ?, ?, ?, ?);""", new_contact)
         conn.commit()
         conn.close()
+        self.new_database()
 
     def remove_contact(self, cuuid):
         conn = sqlite3.connect(self.contacts_db_path)
@@ -87,6 +107,8 @@ class Contact:
         cur.execute(f"DELETE FROM contacts WHERE uuid = \'{cuuid}\';")
         conn.commit()
         conn.close()
+        if os.path.exists(f'user/dialogs/dialog{cuuid}.db'):
+            os.remove(f'user/dialogs/dialog{cuuid}.db')
 
     def existing_contact(self, cuuid):
         conn = sqlite3.connect(self.contacts_db_path)
@@ -107,3 +129,52 @@ class Contact:
         return (self.contact_nickname, self.contact_uuid,
                 self.contact_duid, self.contact_ip, self.contact_port,
                 self.contact_interval, self.contact_is_paired, self.contact_is_available)
+
+    def new_database(self):
+        conn = sqlite3.connect(f"user/dialogs/dialog{self.contact_uuid}.db")
+        cur = conn.cursor()
+        cur.execute(f"""CREATE TABLE IF NOT EXISTS messages(
+               id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+               message TEXT,
+               hash TEXT,
+               date TEXT,
+               status TEXT);
+            """)
+        row = (0, 'START', "START", str(datetime.now()).encode('utf-8'), "START_MESSAGE")
+        cur.execute(f"""INSERT INTO
+            messages(id, message, hash, date, status)
+            VALUES(?, ?, ?, ?, ?);""", row)
+        conn.commit()
+        conn.close()
+
+    def get_messages(self):
+        conn = sqlite3.connect(f"user/dialogs/dialog{self.contact_uuid}.db")
+        cur = conn.cursor()
+        cur.execute(f"SELECT * FROM messages;")
+        result = cur.fetchall()
+        conn.close()
+        return result
+
+
+class Message:
+    def __init__(self, contact):
+        self.to_contact = contact
+        self.message = None
+        self.hash = None  # not using
+        self.date = str(datetime.now()).encode('utf-8')
+        self.status = None  # # not using
+
+    def send(self):
+        print(self.to_contact.contact_nickname)
+        print(self.to_contact.contact_ip)
+
+    def save(self):
+        conn = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")
+        cur = conn.cursor()
+        row = (self.message, 'hash', self.date, 'SENT')
+        cur.execute(f"""INSERT INTO
+            messages(message, hash, date, status)
+            VALUES(?, ?, ?, ?);""", row)
+        conn.commit()
+        conn.close()
+

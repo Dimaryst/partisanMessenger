@@ -1,9 +1,9 @@
 import json
 import sys
-
+import os
 from PyQt5.QtWidgets import QMessageBox
 
-from modules.classes import User, Contact
+from modules.classes import User, Contact, Message
 from assets.Chat import Ui_PartisanMain
 from assets.AddContact import Ui_DialogAddContact
 from PyQt5 import QtWidgets
@@ -15,10 +15,13 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.setupUi(self)
         self.account = None
         self.accountJsonPath = None
+        self.active_contact = None
         self.centralwidget.setDisabled(True)
         self.actionAddAccount.triggered.connect(self.add_account)
-        self.pushButtonAdd.clicked.connect(self.add_contact_dialog)
-        self.pushButtonRemove.clicked.connect(self.remove_contact_dialog)
+        self.pushButtonAdd.clicked.connect(self.add_contact)
+        self.pushButtonRemove.clicked.connect(self.remove_contact)
+        self.listContacts.clicked.connect(self.active_dialog)
+        self.pushButtonSendMessage.clicked.connect(self.send_message)
 
     def add_account(self):
         path_request = QtWidgets.QFileDialog
@@ -32,6 +35,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             with open(self.accountJsonPath, 'r') as account_file:
                 card = json.load(account_file)
             self.account = User()
+            self.active_contact = Contact(self.account)
             self.account.uuid, self.account.ip, self.account.port = \
                 card['UUID'], card['IP'], card['PORT']
             self.centralwidget.setEnabled(True)
@@ -42,19 +46,19 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         for item in self.account.get_contacts():
             self.listContacts.addItem(f"{item[1]}\n@{item[2]}")
 
-    def add_contact_dialog(self):
-        add_contact_dialog = AddContactDialog()
-        add_contact_dialog.exec_()
-        if not add_contact_dialog.is_canceled:
+    def add_contact(self):
+        add_contact_window = AddContactDialog()
+        add_contact_window.exec_()
+        if not add_contact_window.is_canceled:
             new_contact = Contact(self.account)
-            new_contact.contact_nickname = add_contact_dialog.lineNickname.text()
-            new_contact.contact_uuid = add_contact_dialog.lineNewContactUuid.text()
-            new_contact.contact_ip = add_contact_dialog.lineNewContactIp.text()
-            new_contact.contact_port = add_contact_dialog.lineNewContactPort.text()
+            new_contact.contact_nickname = add_contact_window.lineNickname.text()
+            new_contact.contact_uuid = add_contact_window.lineNewContactUuid.text()
+            new_contact.contact_ip = add_contact_window.lineNewContactIp.text()
+            new_contact.contact_port = add_contact_window.lineNewContactPort.text()
             new_contact.add_contact()
             self.load_contact_list()
 
-    def remove_contact_dialog(self):
+    def remove_contact(self):
         confirmation_message = QMessageBox()
         confirmation_message.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         confirmation_message.setText("Are you sure you want to delete this contact?")
@@ -62,8 +66,40 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         if QMessageBox.Yes == confirmation_result:
             uuid = ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
             contact = Contact(self.account)
-            contact.remove_contact(uuid)
+            if uuid == self.account.uuid:
+                error_dialog = QtWidgets.QErrorMessage()
+                error_dialog.showMessage('Can\'t remove SELF!')
+                error_dialog.exec_()
+            else:
+                contact.remove_contact(uuid)
             self.load_contact_list()
+
+    def active_dialog(self):
+        self.active_contact.contact_uuid = \
+            ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
+        self.active_contact.contact_nickname = \
+            ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[0]
+        self.labelChat.setText(f"Chat - {self.active_contact.contact_nickname}@{self.active_contact.contact_uuid}")
+        self.listMessages.clear()
+        for item in self.active_contact.get_messages():
+            self.listMessages.addItem(item[1])
+        self.listMessages.scrollToBottom()
+
+    def send_message(self):
+        self.active_contact.contact_uuid = \
+            ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
+        contact = Contact(self.account)
+        contact.existing_contact(self.active_contact.contact_uuid)
+        if self.lineInputMessage.text() != '':
+            message = Message(contact)
+            message.message = "ME -> " + self.lineInputMessage.text()
+            message.save()
+            message.send()
+            self.listMessages.clear()
+            for item in self.active_contact.get_messages():
+                self.listMessages.addItem(item[1])
+                self.listMessages.scrollToBottom()
+            self.lineInputMessage.clear()
 
 
 class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
@@ -91,8 +127,6 @@ class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
 
 
 def main():
-    # config = ConfigParser()
-    # config.read('config.ini')
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
     window = ChatWindow()  # Создаём объект
     window.show()  # Показываем окно
