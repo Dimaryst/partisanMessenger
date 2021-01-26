@@ -161,12 +161,8 @@ class Message:
         self.to_contact = contact
         self.message = None
         self.hash = None  # not using
-        self.date = str(datetime.now()).encode('utf-8')
+        self.date = str(datetime.now())
         self.status = None  # # not using
-
-    def send(self):
-        print(self.to_contact.contact_nickname)
-        print(self.to_contact.contact_ip)
 
     def save(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")
@@ -178,3 +174,7 @@ class Message:
         conn.commit()
         conn.close()
 
+    def send(self):
+        print(f"\'{self.message}\' ({self.date})")
+        print("Will send to " + self.to_contact.contact_nickname)
+        print("At " + self.to_contact.contact_ip)
