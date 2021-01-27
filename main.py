@@ -16,7 +16,14 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.account = None
         self.accountJsonPath = None
         self.active_contact = None
+        # First setup
         self.centralwidget.setDisabled(True)
+        self.actionAccountInfo.setDisabled(True)
+        self.actionLogout.setDisabled(True)
+
+        #
+        #
+
         self.actionAddAccount.triggered.connect(self.add_account)
         self.pushButtonAdd.clicked.connect(self.add_contact)
         self.pushButtonRemove.clicked.connect(self.remove_contact)
@@ -86,20 +93,25 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.listMessages.scrollToBottom()
 
     def send_message(self):
-        self.active_contact.contact_uuid = \
-            ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
-        contact = Contact(self.account)
-        contact.existing_contact(self.active_contact.contact_uuid)
-        if self.lineInputMessage.text() != '':
-            message = Message(contact)
-            message.message = "ME -> " + self.lineInputMessage.text()
-            message.save()
-            message.send()
-            self.listMessages.clear()
-            for item in self.active_contact.get_messages():
-                self.listMessages.addItem(item[1])
-                self.listMessages.scrollToBottom()
-            self.lineInputMessage.clear()
+        if self.listContacts.currentRow() >= 0:
+            self.active_contact.contact_uuid = \
+                ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
+            contact = Contact(self.account)
+            contact.existing_contact(self.active_contact.contact_uuid)
+            if self.lineInputMessage.text() != '':
+                message = Message(contact)
+                message.message = "ME -> " + self.lineInputMessage.text()
+                message.save()
+                message.send()
+                self.listMessages.clear()
+                for item in self.active_contact.get_messages():
+                    self.listMessages.addItem(item[1])
+                    self.listMessages.scrollToBottom()
+                self.lineInputMessage.clear()
+        else:
+            error_dialog = QtWidgets.QErrorMessage()
+            error_dialog.showMessage('Dialog is not selected')
+            error_dialog.exec_()
 
 
 class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
