@@ -43,6 +43,8 @@ class Ui_DialogAddContact(object):
         self.pushButtonCancel.setObjectName("pushButtonCancel")
         self.horizontalLayout.addWidget(self.pushButtonCancel)
         self.pushButtonAdd = QtWidgets.QPushButton(DialogAddContact)
+        self.pushButtonAdd.setAutoDefault(False)
+        self.pushButtonAdd.setDefault(True)
         self.pushButtonAdd.setObjectName("pushButtonAdd")
         self.horizontalLayout.addWidget(self.pushButtonAdd)
         self.verticalLayout.addLayout(self.horizontalLayout)

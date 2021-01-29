@@ -1,12 +1,18 @@
 import json
 import sys
 import os
+import configparser
+import time
+
+from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
 
 from modules.classes import User, Contact, Message
 from assets.Chat import Ui_PartisanMain
 from assets.AddContact import Ui_DialogAddContact
 from PyQt5 import QtWidgets
+
+from modules.server_queue import Queue
 
 
 class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
@@ -16,19 +22,49 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.account = None
         self.accountJsonPath = None
         self.active_contact = None
+
         # First setup
         self.centralwidget.setDisabled(True)
         self.actionAccountInfo.setDisabled(True)
         self.actionLogout.setDisabled(True)
+        self.server = None
 
         #
         #
 
+        self.load_session()
         self.actionAddAccount.triggered.connect(self.add_account)
         self.pushButtonAdd.clicked.connect(self.add_contact)
         self.pushButtonRemove.clicked.connect(self.remove_contact)
         self.listContacts.clicked.connect(self.active_dialog)
         self.pushButtonSendMessage.clicked.connect(self.send_message)
+
+    def listen(self):
+        self.server = ServerThread(self, self.account.ip, self.account.port)
+        self.server.start_server()
+        self.actionConnection.setText("Connection: OK")
+
+    def load_session(self):
+        if os.path.exists('config.ini'):
+            config = configparser.ConfigParser()
+            config.read("config.ini")
+            user = config["Session"]["user"]
+            if os.path.exists(f"user/{user}.json"):
+                with open(f"user/{user}.json", 'r') as account_file:
+                    card = json.load(account_file)
+                    self.setWindowTitle(f"Partisan - Messenger - user/{user}.json")
+                self.account = User()
+                self.active_contact = Contact(self.account)
+                self.account.uuid, self.account.ip, self.account.port = \
+                    card['UUID'], card['IP'], card['PORT']
+                self.centralwidget.setEnabled(True)
+                self.load_contact_list()
+                self.actionAddAccount.setDisabled(True)
+                self.listen()
+            else:
+                error_dialog = QtWidgets.QErrorMessage()
+                error_dialog.showMessage('User file missing! Reload it manually.')
+                error_dialog.exec_()
 
     def add_account(self):
         path_request = QtWidgets.QFileDialog
@@ -47,6 +83,10 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 card['UUID'], card['IP'], card['PORT']
             self.centralwidget.setEnabled(True)
             self.load_contact_list()
+            with open('config.ini', 'w') as config_file:
+                config_file.write(f"[Session]\nuser={self.account.uuid}")
+            self.actionAddAccount.setDisabled(True)
+            self.listen()
 
     def load_contact_list(self):
         self.listContacts.clear()
@@ -80,6 +120,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             else:
                 contact.remove_contact(uuid)
             self.load_contact_list()
+            self.listMessages.clear()
 
     def active_dialog(self):
         self.active_contact.contact_uuid = \
@@ -100,7 +141,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             contact.existing_contact(self.active_contact.contact_uuid)
             if self.lineInputMessage.text() != '':
                 message = Message(contact)
-                message.message = "ME -> " + self.lineInputMessage.text()
+                message.message = self.lineInputMessage.text()
                 message.save()
                 message.send()
                 self.listMessages.clear()
@@ -136,6 +177,36 @@ class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
 
     def cancel(self):
         self.close()
+
+
+class ServerThread(QThread):
+    def __init__(self, main_window, ip, port):
+        super().__init__()
+        self.ip = ip
+        self.port = port
+        self.main_window = main_window
+        self.queue = Queue(ip, port)
+
+    def start_server(self):
+        self.queue.start_server()
+
+    def stop_server(self):
+        self.queue.stop_server()
+
+    def loop(self):
+        while True:
+            time.sleep(1)
+            while self.queue.exists():
+                self.handle(self.queue.get())
+
+    def handle(self, message):
+        try:
+            # Message = Message()  #  Incoming messages here!
+            # TODO: Func for incoming messages
+            print("Got: {}".format(message))
+
+        except Exception as e:
+            print("Error: {}".format(e))
 
 
 def main():

@@ -9,20 +9,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>320</height>
+    <width>900</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>640</width>
-    <height>320</height>
+    <width>900</width>
+    <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>800</width>
-    <height>600</height>
+    <width>1920</width>
+    <height>1080</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -71,13 +71,17 @@
     </item>
     <item>
      <layout class="QGridLayout" name="gridChat">
-      <item row="3" column="0" colspan="2">
-       <widget class="QListWidget" name="listMessages"/>
+      <item row="1" column="0" colspan="2">
+       <widget class="Line" name="lineChat">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="QPushButton" name="pushButtonSendMessage">
+      <item row="2" column="0" colspan="2">
+       <widget class="QPushButton" name="pushButtonConfig">
         <property name="text">
-         <string>Send</string>
+         <string>Chat Configuration</string>
         </property>
        </widget>
       </item>
@@ -94,14 +98,14 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="lineChat">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="0" column="1">
+       <widget class="QLabel" name="labelChatStatus">
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
-      <item row="0" column="0" colspan="2">
+      <item row="0" column="0">
        <widget class="QLabel" name="labelChat">
         <property name="text">
          <string>Chat</string>
@@ -111,10 +115,16 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QPushButton" name="pushButtonConfig">
+      <item row="3" column="0" colspan="2">
+       <widget class="QListWidget" name="listMessages"/>
+      </item>
+      <item row="5" column="1">
+       <widget class="QPushButton" name="pushButtonSendMessage">
         <property name="text">
-         <string>Chat Configuration</string>
+         <string>Send</string>
+        </property>
+        <property name="default">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -127,7 +137,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>640</width>
+     <width>900</width>
      <height>24</height>
     </rect>
    </property>
@@ -139,7 +149,14 @@
     <addaction name="actionAccountInfo"/>
     <addaction name="actionLogout"/>
    </widget>
+   <widget class="QMenu" name="menuStatus">
+    <property name="title">
+     <string>Status</string>
+    </property>
+    <addaction name="actionConnection"/>
+   </widget>
    <addaction name="menuAccount"/>
+   <addaction name="menuStatus"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAddAccount">
@@ -155,6 +172,11 @@
   <action name="actionLogout">
    <property name="text">
     <string>Logout</string>
+   </property>
+  </action>
+  <action name="actionConnection">
+   <property name="text">
+    <string>Connection</string>
    </property>
   </action>
  </widget>

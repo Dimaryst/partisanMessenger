@@ -158,7 +158,11 @@ class Contact:
 
 class Message:
     def __init__(self, contact):
-        self.to_contact = contact
+        if contact is None:
+            self.to_contact = None
+        else:
+            self.to_contact = contact
+
         self.message = None
         self.hash = None  # not using
         self.date = str(datetime.now())
@@ -175,6 +179,9 @@ class Message:
         conn.close()
 
     def send(self):
+        # TODO: Func for messages
         print(f"\'{self.message}\' ({self.date})")
         print("Will send to " + self.to_contact.contact_nickname)
         print("At " + self.to_contact.contact_ip)
+        package = (self.to_contact.contact_uuid, self.message, self.date)
+        print("DATA: ", package)
