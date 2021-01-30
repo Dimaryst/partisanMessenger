@@ -1,0 +1,27 @@
+{
+  "name": "partisan",
+  "version": "0.0.1",
+  "description": "Partisan",
+  "author": {
+    "name": "sorhajy",
+    "email": "sorhajy@icloud.com"
+  },
+  "repository": {},
+  "dependencies": {},
+  "license": "ISC",
+  "devDependencies": {
+    "bozon": "1.1.3",
+    "jest": "26.6.3",
+    "spectron": "13.0.0"
+  },
+  "build": {
+    "appId": "com.electron.partisan",
+    "win": {
+      "publish": null
+    },
+    "mac": {
+      "publish": null,
+      "category": "your.app.category.type"
+    }
+  }
+}
