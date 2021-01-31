@@ -1,7 +1,7 @@
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 import path from 'path'
-import { app, BrowserWindow, screen, Menu, MenuItem } from 'electron'
+import { app, BrowserWindow, screen, Menu, MenuItem, ipcMain } from 'electron'
 import { type } from 'os'
 
 const menuTemplate = [{
@@ -37,18 +37,30 @@ const menuTemplate = [{
     ]
 }]
 
+let is_online
+ipcMain.on('offline',()=>{
+  is_online = false
+  console.log('Connection failed. Offline mode on.')
+})
+ipcMain.on('online',()=>{
+  is_online = false
+  console.log('Connection established. We are OnLine.')
+})
+
+
 const createWindow = () => {
   const {max_width, max_height} = screen.getPrimaryDisplay().workAreaSize;
-  // Create the browser window.
+  // Create the browser window. 
 
   const menu = new Menu.buildFromTemplate(menuTemplate)
   Menu.setApplicationMenu(menu)
 
   let win = new BrowserWindow({ 
     show: false,
-    backgroundColor: '#2d3436',
+    // backgroundColor: '#2d3436',
+    backgroundColor: '#121316',
     title: CONFIG.name,
-    // titleBarStyle: 'hidden',
+    titleBarStyle: 'hidden',
     width: CONFIG.width,
     height: CONFIG.height,
     minWidth: 800,
@@ -69,7 +81,7 @@ const createWindow = () => {
     win.show()
   })
 
-  // if win.webContents.openDevTools() 
+  // win.webContents.openDevTools()
 
   // send data to renderer process
   win.webContents.on('did-finish-load', () => {
@@ -79,6 +91,7 @@ const createWindow = () => {
       nodeVersion: process.versions.node,
       chromiumVersion: process.versions.chrome
     })
+    // win.webContents.send('mainchannel', {message: 'App started'})
   })
 
   win.on('closed', () => {

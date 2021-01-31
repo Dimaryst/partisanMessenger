@@ -16,27 +16,69 @@ body {
   top: 0;
   left: 0;
   -webkit-app-region: drag;
-  /* background-color: #ffffff; */
 }
 
 .contacts_field {
   position: absolute;
-  /* background-color: #22292acc; */
-  background-color: #171b1c80;
+  background-color: #202227;
   width: 20%;
   height: 100%;
 }
 
-.text_message {
+.text_message_area {
   position: absolute;
-  /* background-color: #22292acc; */
-  background-color: #636e72;
+  background-color: #1f2126;
   width: 100%;
   left: 20%;
   height: 6%;
   max-height: 50px;
   bottom: 1%;
 }
+
+textarea[id=user_message], select {
+  position: absolute;
+  resize: none;
+  width: 73%;
+  left: 20%;
+  height: 5%;
+  max-height: 30%;
+  bottom: 1%; 
+  word-wrap:break-word;
+  font-size: 16px;
+  background-color: #1f2126;
+  color: #ffffff;
+  border-color: #24262e;
+  outline: none;
+  padding: 5px;
+  /* padding-right: 1%; */
+}
+
+button[id=test_button], select {
+/* .test_button { */
+  position: absolute;
+  left: 94%;
+  /* margin-right: 5%; */
+  /* top: 90%;  */
+  height: 5%;
+  max-height: 30%;
+  bottom: 1%;
+  background-color: #6d839d; 
+  border: transparent;
+  border-radius: 5px;
+  color: white;
+  padding: 1%;
+  /* text-align: center; */
+  /* text-decoration: none; */
+  /* display: inline-block; */
+  font-size: 16px;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  /* display: block; */
+}
+/* button.test_button { */
+  /* background-color: #ffffff; */
+  /* background-image: url(/resources/send.ico); */ 
+  /* background-image: url(/resources/send.png); */
+/* } */
 
 .message {
   position: absolute;
