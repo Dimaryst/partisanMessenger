@@ -1,2 +1,4 @@
 build
-.dart_tool/flutter_build
+.dart_tool
+pubspec.lock
+.packages
