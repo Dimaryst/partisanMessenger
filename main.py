@@ -3,6 +3,7 @@ import sys
 import os
 import configparser
 import time
+import qdarkstyle
 
 from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
@@ -52,7 +53,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             if os.path.exists(f"user/{user}.json"):
                 with open(f"user/{user}.json", 'r') as account_file:
                     card = json.load(account_file)
-                    self.setWindowTitle(f"Partisan - Messenger - user/{user}.json")
+                    # self.setWindowTitle(f"Partisan - Messenger - user/{user}.json")
                 self.account = User()
                 self.active_contact = Contact(self.account)
                 self.account.uuid, self.account.ip, self.account.port = \
@@ -73,7 +74,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                                                                "JSON File (*.json)",
                                                                options=options)
         if self.accountJsonPath:
-            self.setWindowTitle(f"Partisan - Messenger - {self.accountJsonPath}")
+            # self.setWindowTitle(f"Partisan - Messenger - {self.accountJsonPath}")
             self.centralwidget.setEnabled(True)
             with open(self.accountJsonPath, 'r') as account_file:
                 card = json.load(account_file)
@@ -95,6 +96,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
 
     def add_contact(self):
         add_contact_window = AddContactDialog()
+        add_contact_window.setStyleSheet(qdarkstyle.load_stylesheet())
         add_contact_window.exec_()
         if not add_contact_window.is_canceled:
             new_contact = Contact(self.account)
@@ -116,6 +118,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             if uuid == self.account.uuid:
                 error_dialog = QtWidgets.QErrorMessage()
                 error_dialog.showMessage('Can\'t remove SELF!')
+                error_dialog.setStyleSheet(qdarkstyle.load_stylesheet())
                 error_dialog.exec_()
             else:
                 contact.remove_contact(uuid)
@@ -144,6 +147,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 message.message = self.lineInputMessage.text()
                 message.save()
                 message.send()
+                # message.add_hash()
                 self.listMessages.clear()
                 for item in self.active_contact.get_messages():
                     self.listMessages.addItem(item[1])
@@ -204,6 +208,7 @@ class ServerThread(QThread):
             # Message = Message()  #  Incoming messages here!
             # TODO: Func for incoming messages
             print("Got: {}".format(message))
+            print(self)
 
         except Exception as e:
             print("Error: {}".format(e))
@@ -211,6 +216,7 @@ class ServerThread(QThread):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
+    app.setStyleSheet(qdarkstyle.load_stylesheet())
     window = ChatWindow()  # Создаём объект
     window.show()  # Показываем окно
     app.exec_()  # и запускаем приложение

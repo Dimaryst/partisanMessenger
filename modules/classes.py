@@ -185,3 +185,11 @@ class Message:
         print("At " + self.to_contact.contact_ip)
         package = (self.to_contact.contact_uuid, self.message, self.date)
         print("DATA: ", package)
+
+    def add_hash(self):
+        conn = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")
+        cur = conn.cursor()
+        cur.execute("SELECT hash from messages WHERE id=(SELECT max(id) FROM messages);")
+        result = cur.fetchone()
+        hs = hashlib.sha256()
+        # hs.update()
