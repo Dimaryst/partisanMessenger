@@ -2,3 +2,4 @@ build
 .dart_tool
 pubspec.lock
 .packages
+lib/examples
