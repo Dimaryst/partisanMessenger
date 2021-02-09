@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
+    <width>1101</width>
     <height>600</height>
    </rect>
   </property>
@@ -29,84 +29,104 @@
    <string>Partisan - Messenger</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
      <layout class="QGridLayout" name="gridContacts">
-      <item row="3" column="0" colspan="2">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="labelContactList">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Contact List</string>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
        <widget class="QListWidget" name="listContacts">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="pushButtonAdd">
-        <property name="text">
-         <string>Add</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
+      <item row="1" column="1">
        <widget class="QPushButton" name="pushButtonRemove">
         <property name="text">
          <string>Remove</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="labelContactList">
+      <item row="1" column="0">
+       <widget class="QPushButton" name="pushButtonAdd">
         <property name="text">
-         <string>Contact List</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="lineContacts">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <string>Add</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
-    <item>
-     <layout class="QGridLayout" name="gridChat">
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="lineChat">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
+    <item row="0" column="1">
+     <layout class="QVBoxLayout" name="verticalLayoutChat">
+      <item>
+       <widget class="QListWidget" name="listMessages"/>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QPushButton" name="pushButtonConfig">
-        <property name="text">
-         <string>Chat Configuration</string>
-        </property>
-       </widget>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutMessageInputAndButton">
+        <item>
+         <widget class="QLineEdit" name="lineInputMessage">
+          <property name="inputMask">
+           <string/>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>Type your message here...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonSendMessage">
+          <property name="text">
+           <string>Send</string>
+          </property>
+          <property name="default">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
-      <item row="5" column="0">
-       <widget class="QLineEdit" name="lineInputMessage">
-        <property name="inputMask">
-         <string/>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="placeholderText">
-         <string>Type your message here...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="labelChatStatus">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
+     </layout>
+    </item>
+    <item row="0" column="2">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
        <widget class="QLabel" name="labelChat">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>140</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Chat</string>
         </property>
@@ -115,16 +135,23 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QListWidget" name="listMessages"/>
-      </item>
-      <item row="5" column="1">
-       <widget class="QPushButton" name="pushButtonSendMessage">
+      <item>
+       <widget class="QLabel" name="labelChatStatus">
         <property name="text">
-         <string>Send</string>
+         <string/>
         </property>
-        <property name="default">
-         <bool>true</bool>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonConfig">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>...</string>
         </property>
        </widget>
       </item>
@@ -137,7 +164,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>900</width>
+     <width>1101</width>
      <height>24</height>
     </rect>
    </property>

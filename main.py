@@ -130,7 +130,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
         self.active_contact.contact_nickname = \
             ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[0]
-        self.labelChat.setText(f"Chat - {self.active_contact.contact_nickname}@{self.active_contact.contact_uuid}")
+        self.labelChat.setText(f"Chat \n{self.active_contact.contact_nickname}")
         self.listMessages.clear()
         for item in self.active_contact.get_messages():
             self.listMessages.addItem(item[1])
