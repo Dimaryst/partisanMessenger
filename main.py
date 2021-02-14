@@ -23,7 +23,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.account = None
         self.accountJsonPath = None
         self.active_contact = None
-
+        # TODO: Active contact as object
         # First setup
         self.centralwidget.setDisabled(True)
         self.actionAccountInfo.setDisabled(True)
@@ -126,11 +126,14 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             self.listMessages.clear()
 
     def active_dialog(self):
-        self.active_contact.contact_uuid = \
+        # TODO: Make this OBJECT (Fix this Shit!)
+        # It's looks done but I'm not sure
+        cuuid = \
             ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
-        self.active_contact.contact_nickname = \
-            ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[0]
-        self.labelChat.setText(f"Chat \n{self.active_contact.contact_nickname}")
+        self.active_contact = Contact(self.account)
+        self.active_contact.existing_contact(cuuid)
+        print(self.active_contact)
+        self.labelChat.setText(f"Chat - {self.active_contact.contact_nickname}")
         self.listMessages.clear()
         for item in self.active_contact.get_messages():
             self.listMessages.addItem(item[1])
@@ -205,8 +208,8 @@ class ServerThread(QThread):
 
     def handle(self, message):
         try:
-            # Message = Message()  #  Incoming messages here!
             # TODO: Func for incoming messages
+
             print("Got: {}".format(message))
             print(self)
 

@@ -149,6 +149,7 @@ class Contact:
 
     def get_messages(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.contact_uuid}.db")
+        print(f"user/dialogs/dialog{self.contact_uuid}.db")
         cur = conn.cursor()
         cur.execute(f"SELECT * FROM messages;")
         result = cur.fetchall()
