@@ -4,3 +4,5 @@ PyQt5-stubs==5.14.2.2
 
 
 QDarkStyle~=2.8.1
+configparser~=5.0.1
+icmplib~=2.0.2

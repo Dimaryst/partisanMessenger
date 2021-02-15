@@ -158,21 +158,26 @@ class Contact:
 
 
 class Message:
-    def __init__(self, contact):
+    def __init__(self, contact, sender):
         if contact is None:
             self.to_contact = None
         else:
             self.to_contact = contact
 
+        if sender is None:
+            self.sender = None
+        else:
+            self.sender = sender
+
         self.message = None
-        self.hash = None  # not using
+        self.hash = "hash"
         self.date = str(datetime.now())
         self.status = None  # # not using
 
     def save(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")
         cur = conn.cursor()
-        row = (self.message, 'hash', self.date, 'SENT')
+        row = (self.message, self.hash, self.date, 'SENT')
         cur.execute(f"""INSERT INTO
             messages(message, hash, date, status)
             VALUES(?, ?, ?, ?);""", row)
@@ -181,16 +186,14 @@ class Message:
 
     def send(self):
         # TODO: Func for messages
-        print(f"\'{self.message}\' ({self.date})")
-        print("Will send to " + self.to_contact.contact_nickname)
-        print("At " + self.to_contact.contact_ip)
-        package = (self.to_contact.contact_uuid, self.message, self.date)
-        print("DATA: ", package)
+        package = (self.sender.uuid, self.to_contact.contact_uuid, self.message, self.date)
+        print("DATA: ", package)  # Ready package to recipient
 
     def add_hash(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")
         cur = conn.cursor()
         cur.execute("SELECT hash from messages WHERE id=(SELECT max(id) FROM messages);")
         result = cur.fetchone()
-        hs = hashlib.sha256()
-        # hs.update()
+        hs = hashlib.sha256(str(result).encode('utf-8'))
+        hs.update(self.message.encode('utf-8'))
+        self.hash = hs.hexdigest()

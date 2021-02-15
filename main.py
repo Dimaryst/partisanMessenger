@@ -4,10 +4,12 @@ import os
 import configparser
 import time
 import qdarkstyle
+from icmplib import ping
 
 from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
 
+from assets.ContactInfoDialog import Ui_DialogContactInfo
 from modules.classes import User, Contact, Message
 from assets.Chat import Ui_PartisanMain
 from assets.AddContact import Ui_DialogAddContact
@@ -23,7 +25,6 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.account = None
         self.accountJsonPath = None
         self.active_contact = None
-        # TODO: Active contact as object
         # First setup
         self.centralwidget.setDisabled(True)
         self.actionAccountInfo.setDisabled(True)
@@ -39,6 +40,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.pushButtonRemove.clicked.connect(self.remove_contact)
         self.listContacts.clicked.connect(self.active_dialog)
         self.pushButtonSendMessage.clicked.connect(self.send_message)
+        self.pushButtonConfig.clicked.connect(self.contact_info)
 
     def listen(self):
         self.server = ServerThread(self, self.account.ip, self.account.port)
@@ -125,19 +127,28 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             self.load_contact_list()
             self.listMessages.clear()
 
+    def contact_info(self):
+        # print(self.active_contact)
+        if self.active_contact.contact_uuid is not None:
+            info_window = EditContactDialog(self.active_contact)
+            info_window.setStyleSheet(qdarkstyle.load_stylesheet())
+            info_window.exec_()
+            if not info_window.is_canceled:
+                print("Nice")
+
     def active_dialog(self):
-        # TODO: Make this OBJECT (Fix this Shit!)
-        # It's looks done but I'm not sure
         cuuid = \
             ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
         self.active_contact = Contact(self.account)
         self.active_contact.existing_contact(cuuid)
-        print(self.active_contact)
+        # print(self.active_contact)
         self.labelChat.setText(f"Chat - {self.active_contact.contact_nickname}")
         self.listMessages.clear()
         for item in self.active_contact.get_messages():
             self.listMessages.addItem(item[1])
         self.listMessages.scrollToBottom()
+        self.listContacts.setDisabled(True)
+        self.check_connection()
 
     def send_message(self):
         if self.listContacts.currentRow() >= 0:
@@ -146,11 +157,11 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             contact = Contact(self.account)
             contact.existing_contact(self.active_contact.contact_uuid)
             if self.lineInputMessage.text() != '':
-                message = Message(contact)
+                message = Message(contact, self.account)
                 message.message = self.lineInputMessage.text()
+                message.add_hash()
                 message.save()
                 message.send()
-                # message.add_hash()
                 self.listMessages.clear()
                 for item in self.active_contact.get_messages():
                     self.listMessages.addItem(item[1])
@@ -160,6 +171,11 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             error_dialog = QtWidgets.QErrorMessage()
             error_dialog.showMessage('Dialog is not selected')
             error_dialog.exec_()
+
+    def check_connection(self):
+        conn = CheckConnectionThread(self, self.active_contact.contact_ip)
+        print(conn.check())
+        self.listContacts.setEnabled(True)
 
 
 class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
@@ -181,6 +197,23 @@ class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
         else:
             self.is_canceled = False
             self.close()
+
+    def cancel(self):
+        self.close()
+
+
+class EditContactDialog(QtWidgets.QDialog, Ui_DialogContactInfo):
+    def __init__(self, contact):
+        super().__init__()
+        self.setupUi(self)
+        self.labelError.setHidden(True)
+        self.is_canceled = True
+        self.contact = contact
+        self.pushButtonCancel.clicked.connect(self.cancel)
+        self.lineEditUsername.setText(str(self.contact.contact_nickname))
+        self.lineEditUuid.setText(str(self.contact.contact_uuid))
+        self.lineEditIp.setText(str(self.contact.contact_ip))
+        self.lineEditPort.setText(str(self.contact.contact_port))
 
     def cancel(self):
         self.close()
@@ -215,6 +248,17 @@ class ServerThread(QThread):
 
         except Exception as e:
             print("Error: {}".format(e))
+
+
+class CheckConnectionThread(QThread):
+    def __init__(self, main_window, ip):
+        super().__init__()
+        self.main_window = main_window
+        self.contact_ip = ip
+
+    def check(self):
+        host = ping(self.contact_ip, count=1, interval=0.1, privileged=False)
+        return host.is_alive
 
 
 def main():
