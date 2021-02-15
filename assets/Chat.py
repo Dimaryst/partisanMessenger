@@ -90,6 +90,8 @@ class Ui_PartisanMain(object):
         self.labelChatStatus.setText("")
         self.labelChatStatus.setObjectName("labelChatStatus")
         self.verticalLayout.addWidget(self.labelChatStatus)
+        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem)
         self.pushButtonConfig = QtWidgets.QPushButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)

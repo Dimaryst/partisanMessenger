@@ -30,7 +30,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.actionAccountInfo.setDisabled(True)
         self.actionLogout.setDisabled(True)
         self.server = None
-
+        self.check_connection_thread = CheckConnectionThread(self)
         #
         #
 
@@ -137,18 +137,19 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 print("Nice")
 
     def active_dialog(self):
+        self.check_connection_thread.quit()
+        self.listMessages.clear()
+        self.labelChat.setText("Chat")
         cuuid = \
             ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
         self.active_contact = Contact(self.account)
         self.active_contact.existing_contact(cuuid)
-        # print(self.active_contact)
         self.labelChat.setText(f"Chat - {self.active_contact.contact_nickname}")
-        self.listMessages.clear()
         for item in self.active_contact.get_messages():
             self.listMessages.addItem(item[1])
         self.listMessages.scrollToBottom()
-        self.listContacts.setDisabled(True)
-        self.check_connection()
+        self.check_connection_thread.contact_ip = self.active_contact.contact_ip
+        self.check_connection_thread.start()
 
     def send_message(self):
         if self.listContacts.currentRow() >= 0:
@@ -171,11 +172,6 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             error_dialog = QtWidgets.QErrorMessage()
             error_dialog.showMessage('Dialog is not selected')
             error_dialog.exec_()
-
-    def check_connection(self):
-        conn = CheckConnectionThread(self, self.active_contact.contact_ip)
-        print(conn.check())
-        self.listContacts.setEnabled(True)
 
 
 class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
@@ -251,14 +247,20 @@ class ServerThread(QThread):
 
 
 class CheckConnectionThread(QThread):
-    def __init__(self, main_window, ip):
+    def __init__(self, main_window):
         super().__init__()
         self.main_window = main_window
-        self.contact_ip = ip
+        self.contact_ip = 'localhost'
 
-    def check(self):
-        host = ping(self.contact_ip, count=1, interval=0.1, privileged=False)
-        return host.is_alive
+    def run(self):
+        self.main_window.labelChatStatus.setText("Connection...")
+        print(self.contact_ip)
+        host = ping(self.contact_ip, count=5, interval=0.1, privileged=False)
+        if host.is_alive:
+            self.main_window.labelChatStatus.setText("Online")
+        else:
+            self.main_window.labelChatStatus.setText("Offline")
+        self.quit()
 
 
 def main():
