@@ -39,6 +39,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.pushButtonAdd.clicked.connect(self.add_contact)
         self.pushButtonRemove.clicked.connect(self.remove_contact)
         self.listContacts.clicked.connect(self.active_dialog)
+
         self.pushButtonSendMessage.clicked.connect(self.send_message)
         self.pushButtonConfig.clicked.connect(self.contact_info)
 
@@ -137,7 +138,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 print("Nice")
 
     def active_dialog(self):
-        self.check_connection_thread.quit()
+        self.check_connection_thread.terminate()
         self.listMessages.clear()
         self.labelChat.setText("Chat")
         cuuid = \
