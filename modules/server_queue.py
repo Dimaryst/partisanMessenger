@@ -1,5 +1,6 @@
 import threading
 import socketserver
+import time
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -8,8 +9,8 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        data = self.request.recv(1024)
-        print(f"Received: {data.decode('utf-8')}")
+        """    Prototype    """
+        pass
 
 
 class Queue:
@@ -24,7 +25,6 @@ class Queue:
 
     def start_server(self):
         self.server_thread.start()
-        # print("Server loop running in thread:", self.server_thread.name)
         print(f"\nIncoming messages server\nIP: {self.ip}\nPORT: {self.port}")
 
     def stop_server(self):
@@ -42,3 +42,27 @@ class Queue:
 
     def exists(self):
         return len(self.messages)
+
+
+class Server:
+    def __init__(self, ip, port, main_window):
+        self.ip = ip
+        self.port = port
+        self.main_window = main_window
+        self.queue = Queue(self.ip, self.port)
+
+    def start_server(self):
+        self.queue.start_server()
+
+    def stop_server(self):
+        self.queue.stop_server()
+
+    def loop(self):
+        while True:
+            time.sleep(1)
+            while self.queue.exists():
+                self.handle(self.queue.get())
+
+    def handle(self, message):
+        """    Prototype    """
+        pass

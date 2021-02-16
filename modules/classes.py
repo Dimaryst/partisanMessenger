@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import socket
 import sqlite3
 from datetime import datetime
 
@@ -149,7 +150,7 @@ class Contact:
 
     def get_messages(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.contact_uuid}.db")
-        print(f"user/dialogs/dialog{self.contact_uuid}.db")
+        # print(f"user/dialogs/dialog{self.contact_uuid}.db")
         cur = conn.cursor()
         cur.execute(f"SELECT * FROM messages;")
         result = cur.fetchall()
@@ -185,9 +186,14 @@ class Message:
         conn.close()
 
     def send(self):
-        # TODO: Func for messages
         package = (self.sender.uuid, self.to_contact.contact_uuid, self.message, self.date)
-        print("DATA: ", package)  # Ready package to recipient
+        package = json.dumps(package)  # print("DATA: ", package)  # Ready package to recipient
+        try:
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            sock.connect(("localhost", 41030))
+            sock.send(package.encode('utf-8'))
+        except Exception as e:
+            print(f"Failed ({e})")
 
     def add_hash(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")
