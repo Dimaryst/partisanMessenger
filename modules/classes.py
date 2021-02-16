@@ -160,20 +160,11 @@ class Contact:
 
 class Message:
     def __init__(self, contact, sender):
-        if contact is None:
-            self.to_contact = None
-        else:
-            self.to_contact = contact
-
-        if sender is None:
-            self.sender = None
-        else:
-            self.sender = sender
-
-        self.message = None
+        self.to_contact = contact
+        self.sender = sender
+        self.message, self.status = None, None
         self.hash = "hash"
         self.date = str(datetime.now())
-        self.status = None  # # not using
 
     def save(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")
@@ -188,9 +179,10 @@ class Message:
     def send(self):
         package = (self.sender.uuid, self.to_contact.contact_uuid, self.message, self.date)
         package = json.dumps(package)  # print("DATA: ", package)  # Ready package to recipient
+        print(package)
         try:
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-            sock.connect(("localhost", 41030))
+            sock.connect((self.to_contact.contact_ip, self.to_contact.contact_port))
             sock.send(package.encode('utf-8'))
         except Exception as e:
             print(f"Failed ({e})")

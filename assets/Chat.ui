@@ -50,6 +50,12 @@
       </item>
       <item row="2" column="0" colspan="2">
        <widget class="QListWidget" name="listContacts">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -69,6 +75,12 @@
       </item>
       <item row="1" column="1">
        <widget class="QPushButton" name="pushButtonRemove">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Remove</string>
         </property>
@@ -76,6 +88,12 @@
       </item>
       <item row="1" column="0">
        <widget class="QPushButton" name="pushButtonAdd">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Add</string>
         </property>
@@ -93,12 +111,25 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayoutChat">
       <item>
-       <widget class="QListWidget" name="listMessages"/>
+       <widget class="QListWidget" name="listMessages">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayoutMessageInputAndButton">
         <item>
          <widget class="QLineEdit" name="lineInputMessage">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="inputMask">
            <string/>
           </property>

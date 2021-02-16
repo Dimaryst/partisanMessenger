@@ -1,3 +1,4 @@
+import socket
 import threading
 import socketserver
 import time
@@ -9,8 +10,8 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        """    Prototype    """
-        pass
+        data = self.request.recv(1024)
+        self.server.queue.add(data)
 
 
 class Queue:
@@ -19,13 +20,14 @@ class Queue:
         self.server.queue = self
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.daemon = True
-        self.messages = []
         self.ip = ip
         self.port = port
+        self.messages = []
 
     def start_server(self):
         self.server_thread.start()
-        print(f"\nIncoming messages server\nIP: {self.ip}\nPORT: {self.port}")
+        print("Server loop running in thread:", self.server_thread.name)
+        print(f"Server: {self.ip}:{self.port}")
 
     def stop_server(self):
         self.server.shutdown()
@@ -45,11 +47,8 @@ class Queue:
 
 
 class Server:
-    def __init__(self, ip, port, main_window):
-        self.ip = ip
-        self.port = port
-        self.main_window = main_window
-        self.queue = Queue(self.ip, self.port)
+    def __init__(self, ip, port):
+        self.queue = Queue(ip, port)
 
     def start_server(self):
         self.queue.start_server()
@@ -60,9 +59,19 @@ class Server:
     def loop(self):
         while True:
             time.sleep(1)
-            while self.queue.exists():
+            if self.queue.exists():
                 self.handle(self.queue.get())
 
+    def send(self, ip, port, message):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((ip, port))
+        try:
+            sock.sendall(bytes(message, 'ascii'))
+        finally:
+            sock.close()
+
     def handle(self, message):
-        """    Prototype    """
+        """
+        Prototype
+        """
         pass

@@ -2,8 +2,8 @@ import json
 import sys
 import os
 import configparser
-import time
 import qdarkstyle
+import requests
 from icmplib import ping
 
 from PyQt5.QtCore import QThread
@@ -15,7 +15,7 @@ from assets.Chat import Ui_PartisanMain
 from assets.AddContact import Ui_DialogAddContact
 from PyQt5 import QtWidgets
 
-from modules.server_queue import Queue, Server
+from modules.server_queue import Server
 
 
 class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
@@ -25,13 +25,11 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.account = None
         self.accountJsonPath = None
         self.active_contact = None
-        # First setup
         self.centralwidget.setDisabled(True)
         self.actionAccountInfo.setDisabled(True)
         self.actionLogout.setDisabled(True)
-        self.server = None
         self.check_connection_thread = CheckConnectionThread(self)
-        #
+        self.messages_server_thread = MessagesServerThread(self, 'localhost', 41030)
         #
 
         self.load_session()
@@ -44,8 +42,9 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.pushButtonConfig.clicked.connect(self.contact_info)
 
     def listen(self):
-        self.server = Server(self.account.ip, self.account.port, self)
-        self.server.start_server()
+        self.messages_server_thread.ip = self.account.ip
+        self.messages_server_thread.port = self.account.port
+        self.messages_server_thread.start()
         self.actionConnection.setText("Connection: OK")
 
     def load_session(self):
@@ -94,7 +93,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
     def load_contact_list(self):
         self.listContacts.clear()
         for item in self.account.get_contacts():
-            self.listContacts.addItem(f"{item[1]}\n@{item[2]}")
+            self.listContacts.addItem(f"{item[1]}@{item[2]}")
 
     def add_contact(self):
         add_contact_window = AddContactDialog()
@@ -128,7 +127,6 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             self.listMessages.clear()
 
     def contact_info(self):
-        # print(self.active_contact)
         if self.active_contact.contact_uuid is not None:
             info_window = EditContactDialog(self.active_contact)
             info_window.setStyleSheet(qdarkstyle.load_stylesheet())
@@ -147,8 +145,9 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.active_contact = Contact(self.account)
         self.active_contact.existing_contact(cuuid)
         self.labelChat.setText(f"Chat - {self.active_contact.contact_nickname}")
+
         for item in self.active_contact.get_messages():
-            self.listMessages.addItem(item[1])
+            self.listMessages.addItem(f"({item[3]})\n > {item[1]}\n")
         self.listMessages.scrollToBottom()
         self.check_connection_thread.contact_ip = self.active_contact.contact_ip
         self.check_connection_thread.start()
@@ -167,7 +166,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 message.send()
                 self.listMessages.clear()
                 for item in self.active_contact.get_messages():
-                    self.listMessages.addItem(item[1])
+                    self.listMessages.addItem(f"{self.active_contact.contact_nickname} ({item[3]})\n > {item[1]}\n")
                     self.listMessages.scrollToBottom()
                 self.lineInputMessage.clear()
         else:
@@ -234,13 +233,35 @@ class CheckConnectionThread(QThread):
         self.quit()
 
 
+class MessagesServer(Server):
+    def handle(self, message):
+        # Write received messages to db
+        data = json.loads(message.decode('utf-8'))
+        print("Sender: ", data[0])
+        print("Receiver: ", data[1])
+
+
+class MessagesServerThread(QThread):
+    def __init__(self, main_window, ip, port):
+        super().__init__()
+        self.main_window = main_window
+        self.ip = ip
+        self.port = port
+
+    def run(self):
+        server = MessagesServer(self.ip, self.port)
+        server.start_server()
+        server.loop()
+        server.stop_server()
+
+
 def main():
-    app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
+    app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(qdarkstyle.load_stylesheet())
-    window = ChatWindow()  # Создаём объект
-    window.show()  # Показываем окно
-    app.exec_()  # и запускаем приложение
+    window = ChatWindow()
+    window.show()
+    app.exec_()
 
 
-if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
-    main()  # то запускаем функцию main()
+if __name__ == '__main__':
+    main()
