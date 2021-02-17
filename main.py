@@ -2,7 +2,6 @@ import json
 import sys
 import os
 import configparser
-import time
 
 import qdarkstyle
 from icmplib import ping
@@ -29,7 +28,8 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.centralwidget.setDisabled(True)
         self.actionAccountInfo.setDisabled(True)
         self.actionLogout.setDisabled(True)
-
+        self.actionConnection.setText("Connection: Offline")
+        self.lineInputMessage.setMaxLength(48)
         # Threads
         self.check_connection_thread = CheckConnectionThread(self)  # Thread ping selected contact
         self.messages_server_thread = MessagesServerThread(self, 'localhost', 41030)  # Incoming messages server
@@ -39,8 +39,10 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.pushButtonRemove.clicked.connect(self.remove_contact)
         self.listContacts.clicked.connect(self.active_dialog)
 
+        self.pushButtonClearChat.clicked.connect(self.clear_chat)
         self.pushButtonSendMessage.clicked.connect(self.send_message)
         self.pushButtonConfig.clicked.connect(self.contact_info)
+        self.pushButtonUpdateListMessages.clicked.connect(self.update_messages_list)
         self.load_session()  # Load user from config and json
 
     def listen(self):
@@ -65,7 +67,6 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 self.centralwidget.setEnabled(True)
                 self.load_contact_list()
                 self.actionAddAccount.setDisabled(True)
-                self.pushButtonSendMessage.setDisabled(True)
                 self.lineInputMessage.setDisabled(True)
                 self.pushButtonConfig.setDisabled(True)
                 self.listen()
@@ -98,7 +99,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
     def load_contact_list(self):
         self.listContacts.clear()
         for item in self.account.get_contacts():
-            self.listContacts.addItem(f"{item[1]}@{item[2]}")
+            self.listContacts.addItem(f"{item[1]}\n@{item[2]}")
 
     def add_contact(self):
         add_contact_window = AddContactDialog()
@@ -123,7 +124,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             contact = Contact(self.account)
             if uuid == self.account.uuid:
                 error_dialog = QtWidgets.QErrorMessage()
-                error_dialog.showMessage('Can\'t remove SELF!')
+                error_dialog.showMessage('Can\'t remove self!')
                 error_dialog.setStyleSheet(qdarkstyle.load_stylesheet())
                 error_dialog.exec_()
             else:
@@ -140,46 +141,57 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 print("Nice")
 
     def active_dialog(self):
-        self.check_connection_thread.terminate()
+        self.update_active_contact()
+        self.update_messages_list()
         self.pushButtonSendMessage.setDisabled(True)
+        if self.check_connection_thread.isRunning():
+            self.check_connection_thread.terminate()
         self.lineInputMessage.clear()
-
-        self.labelChat.setText("Chat")
-        cuuid = \
-            ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
-        self.active_contact = Contact(self.account)
-        self.active_contact.existing_contact(cuuid)
-        self.labelChat.setText(f"Chat - {self.active_contact.contact_nickname}")
-        self.listMessages.clear()
-        for item in self.active_contact.get_messages():
-            self.listMessages.addItem(item[1])
-            self.listMessages.scrollToBottom()
-
         self.check_connection_thread.contact_ip = self.active_contact.contact_ip
         self.check_connection_thread.start()
+        self.update_messages_list()
 
     def send_message(self):
         if self.listContacts.currentRow() >= 0:
-            self.active_contact.contact_uuid = \
-                ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
-            contact = Contact(self.account)
-            contact.existing_contact(self.active_contact.contact_uuid)
+            self.update_active_contact()
             if self.lineInputMessage.text() != '':
-                message = Message(contact, self.account)
+                message = Message(self.active_contact, self.account)
                 message.message = self.lineInputMessage.text()
                 message.add_hash()
                 message.save()
                 message.send()
                 self.lineInputMessage.clear()
-                self.listMessages.clear()
-                for item in self.active_contact.get_messages():
-                    self.listMessages.addItem(item[1])
-                    self.listMessages.scrollToBottom()
-
+                self.update_messages_list()
         else:
             error_dialog = QtWidgets.QErrorMessage()
             error_dialog.showMessage('Dialog is not selected')
             error_dialog.exec_()
+
+    def update_messages_list(self):
+        if self.listContacts.currentRow() >= 0:
+            self.update_active_contact()
+            self.listMessages.clear()
+            for item in self.active_contact.get_messages():
+                self.listMessages.addItem(item[1])
+                self.listMessages.scrollToBottom()
+
+    def update_active_contact(self):
+        if self.listContacts.currentRow() >= 0:
+            cuuid = \
+                ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]  # Selected UUID
+            self.active_contact = Contact(self.account)  # Update current Contact Obj
+            self.active_contact.existing_contact(cuuid)  # and load contact info via selected UUID
+            self.labelChat.setText(f"Chat - {self.active_contact.contact_nickname}")
+            # self.labelChatStatus.setText("Waiting...")
+
+    def clear_chat(self):
+        self.update_active_contact()
+        warning_dialog = QtWidgets.QMessageBox
+        answer = warning_dialog.question(self, '', "Are you sure to delete all messages?",
+                                         warning_dialog.Yes | warning_dialog.No)
+        if answer == warning_dialog.Yes:
+            self.active_contact.delete_messages()
+            self.update_messages_list()
 
 
 class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
@@ -231,7 +243,7 @@ class CheckConnectionThread(QThread):
 
     def run(self):
         self.main_window.labelChatStatus.setText("Connection...")
-        host = ping(self.contact_ip, count=2, interval=0.1, privileged=False)
+        host = ping(self.contact_ip, count=5, interval=0.1, privileged=False)
         if host.is_alive:
             self.main_window.labelChatStatus.setText("Online")
             self.main_window.pushButtonSendMessage.setEnabled(True)
@@ -244,14 +256,14 @@ class CheckConnectionThread(QThread):
 class MessagesServer(Server):
     def handle(self, message):
         package = json.loads(message.decode('utf-8'))
-        # Load Current User
+        # Load Current User as obj
         config = configparser.ConfigParser()
         config.read("config.ini")
         user = config["Session"]["user"]
         with open(f"user/{user}.json", 'r') as account_file:
             card = json.load(account_file)
 
-        receiver = User()
+        receiver = User()  # Current User (same as in ChatWindow)
         receiver.uuid, receiver.ip, receiver.port = card['UUID'], card['IP'], card['PORT']
         sender = Contact(receiver)
         if sender.is_exist(package[0]) and receiver.uuid == package[1]:

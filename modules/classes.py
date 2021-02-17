@@ -13,7 +13,7 @@ class User:
         self.port = 41030  # Default Port
 
     def new_user(self, ip=str, entropy="entropy"):
-        uuid = hashlib.sha256()
+        uuid = hashlib.sha1()
         uuid.update(str(datetime.now()).encode('utf-8'))
         uuid.update(ip.encode('utf-8'))
         uuid.update(entropy.encode('utf-8'))
@@ -36,7 +36,7 @@ class User:
                is_paired INT,
                is_available INT);
             """)
-        self_as_contact = (0, 'SELF', self.uuid, "0", self.ip, self.port, 0, 1, 1)
+        self_as_contact = (0, 'self', self.uuid, "0", self.ip, self.port, 0, 1, 1)
         cur.execute(f"""INSERT INTO
             contacts(id, nickname, uuid, duid, ip, port, interval, is_paired, is_available)
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);""", self_as_contact)
@@ -155,6 +155,13 @@ class Contact:
         result = cur.fetchall()
         conn.close()
         return result
+
+    def delete_messages(self):
+        conn = sqlite3.connect(f"user/dialogs/dialog{self.contact_uuid}.db")
+        cur = conn.cursor()
+        cur.execute("DELETE FROM messages WHERE id > 0;")
+        conn.commit()
+        conn.close()
 
     def last_message_id(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.contact_uuid}.db")
