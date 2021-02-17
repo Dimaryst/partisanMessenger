@@ -150,12 +150,29 @@ class Contact:
 
     def get_messages(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.contact_uuid}.db")
-        # print(f"user/dialogs/dialog{self.contact_uuid}.db")
         cur = conn.cursor()
-        cur.execute(f"SELECT * FROM messages;")
+        cur.execute(f"SELECT * FROM messages WHERE id > 0;")
         result = cur.fetchall()
         conn.close()
         return result
+
+    def last_message_id(self):
+        conn = sqlite3.connect(f"user/dialogs/dialog{self.contact_uuid}.db")
+        cur = conn.cursor()
+        cur.execute(f"SELECT id FROM messages WHERE id=(SELECT max(id) FROM messages);")
+        result = cur.fetchone()
+        conn.close()
+        return result
+
+    def is_exist(self, cuuid=None):
+        conn = sqlite3.connect(self.contacts_db_path)
+        cur = conn.cursor()
+        cur.execute(f"SELECT * FROM contacts WHERE uuid = \'{cuuid}\';")
+        request_result = cur.fetchone()
+        if request_result != '':
+            return True
+        else:
+            return False
 
 
 class Message:
@@ -166,10 +183,14 @@ class Message:
         self.hash = "hash"
         self.date = str(datetime.now())
 
+    def load(self, package):
+        self.message = package[2]
+        self.hash = package[3]
+
     def save(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")
         cur = conn.cursor()
-        row = (self.message, self.hash, self.date, 'SENT')
+        row = (f"(ME) > \n{self.message}", self.hash, self.date, 'STATUS')
         cur.execute(f"""INSERT INTO
             messages(message, hash, date, status)
             VALUES(?, ?, ?, ?);""", row)
@@ -195,3 +216,13 @@ class Message:
         hs = hashlib.sha256(str(result).encode('utf-8'))
         hs.update(self.message.encode('utf-8'))
         self.hash = hs.hexdigest()
+
+    def receive(self):
+        conn = sqlite3.connect(f"user/dialogs/dialog{self.sender.contact_uuid}.db")
+        cur = conn.cursor()
+        row = (f"({self.sender.contact_uuid}) > \n{self.message}", self.hash, self.date, 'STATUS')
+        cur.execute(f"""INSERT INTO
+                    messages(message, hash, date, status)
+                    VALUES(?, ?, ?, ?);""", row)
+        conn.commit()
+        conn.close()

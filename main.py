@@ -2,8 +2,9 @@ import json
 import sys
 import os
 import configparser
+import time
+
 import qdarkstyle
-import requests
 from icmplib import ping
 
 from PyQt5.QtCore import QThread
@@ -15,7 +16,7 @@ from assets.Chat import Ui_PartisanMain
 from assets.AddContact import Ui_DialogAddContact
 from PyQt5 import QtWidgets
 
-from modules.server_queue import Server
+from modules.server import Server
 
 
 class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
@@ -28,11 +29,11 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.centralwidget.setDisabled(True)
         self.actionAccountInfo.setDisabled(True)
         self.actionLogout.setDisabled(True)
-        self.check_connection_thread = CheckConnectionThread(self)
-        self.messages_server_thread = MessagesServerThread(self, 'localhost', 41030)
-        #
 
-        self.load_session()
+        # Threads
+        self.check_connection_thread = CheckConnectionThread(self)  # Thread ping selected contact
+        self.messages_server_thread = MessagesServerThread(self, 'localhost', 41030)  # Incoming messages server
+        #
         self.actionAddAccount.triggered.connect(self.add_account)
         self.pushButtonAdd.clicked.connect(self.add_contact)
         self.pushButtonRemove.clicked.connect(self.remove_contact)
@@ -40,6 +41,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
 
         self.pushButtonSendMessage.clicked.connect(self.send_message)
         self.pushButtonConfig.clicked.connect(self.contact_info)
+        self.load_session()  # Load user from config and json
 
     def listen(self):
         self.messages_server_thread.ip = self.account.ip
@@ -63,6 +65,9 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 self.centralwidget.setEnabled(True)
                 self.load_contact_list()
                 self.actionAddAccount.setDisabled(True)
+                self.pushButtonSendMessage.setDisabled(True)
+                self.lineInputMessage.setDisabled(True)
+                self.pushButtonConfig.setDisabled(True)
                 self.listen()
             else:
                 error_dialog = QtWidgets.QErrorMessage()
@@ -135,20 +140,21 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 print("Nice")
 
     def active_dialog(self):
+        self.check_connection_thread.terminate()
         self.pushButtonSendMessage.setDisabled(True)
         self.lineInputMessage.clear()
-        self.check_connection_thread.terminate()
-        self.listMessages.clear()
+
         self.labelChat.setText("Chat")
         cuuid = \
             ((self.listContacts.item(self.listContacts.currentRow())).text()).split("@")[1]
         self.active_contact = Contact(self.account)
         self.active_contact.existing_contact(cuuid)
         self.labelChat.setText(f"Chat - {self.active_contact.contact_nickname}")
-
+        self.listMessages.clear()
         for item in self.active_contact.get_messages():
-            self.listMessages.addItem(f"({item[3]})\n > {item[1]}\n")
-        self.listMessages.scrollToBottom()
+            self.listMessages.addItem(item[1])
+            self.listMessages.scrollToBottom()
+
         self.check_connection_thread.contact_ip = self.active_contact.contact_ip
         self.check_connection_thread.start()
 
@@ -164,11 +170,12 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 message.add_hash()
                 message.save()
                 message.send()
+                self.lineInputMessage.clear()
                 self.listMessages.clear()
                 for item in self.active_contact.get_messages():
-                    self.listMessages.addItem(f"{self.active_contact.contact_nickname} ({item[3]})\n > {item[1]}\n")
+                    self.listMessages.addItem(item[1])
                     self.listMessages.scrollToBottom()
-                self.lineInputMessage.clear()
+
         else:
             error_dialog = QtWidgets.QErrorMessage()
             error_dialog.showMessage('Dialog is not selected')
@@ -224,10 +231,11 @@ class CheckConnectionThread(QThread):
 
     def run(self):
         self.main_window.labelChatStatus.setText("Connection...")
-        host = ping(self.contact_ip, count=1, interval=0.1, privileged=False)
+        host = ping(self.contact_ip, count=2, interval=0.1, privileged=False)
         if host.is_alive:
             self.main_window.labelChatStatus.setText("Online")
             self.main_window.pushButtonSendMessage.setEnabled(True)
+            self.main_window.lineInputMessage.setEnabled(True)
         else:
             self.main_window.labelChatStatus.setText("Offline")
         self.quit()
@@ -235,10 +243,22 @@ class CheckConnectionThread(QThread):
 
 class MessagesServer(Server):
     def handle(self, message):
-        # Write received messages to db
-        data = json.loads(message.decode('utf-8'))
-        print("Sender: ", data[0])
-        print("Receiver: ", data[1])
+        package = json.loads(message.decode('utf-8'))
+        # Load Current User
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        user = config["Session"]["user"]
+        with open(f"user/{user}.json", 'r') as account_file:
+            card = json.load(account_file)
+
+        receiver = User()
+        receiver.uuid, receiver.ip, receiver.port = card['UUID'], card['IP'], card['PORT']
+        sender = Contact(receiver)
+        if sender.is_exist(package[0]) and receiver.uuid == package[1]:
+            sender.existing_contact(package[0])
+            message = Message(receiver, sender)
+            message.load(package)
+            message.receive()
 
 
 class MessagesServerThread(QThread):
