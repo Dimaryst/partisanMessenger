@@ -137,7 +137,7 @@
            <string/>
           </property>
           <property name="placeholderText">
-           <string>Type your message here...</string>
+           <string/>
           </property>
          </widget>
         </item>
