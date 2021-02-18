@@ -263,9 +263,9 @@
     <property name="title">
      <string>Account</string>
     </property>
+    <addaction name="actionNew"/>
     <addaction name="actionAddAccount"/>
     <addaction name="actionAccountInfo"/>
-    <addaction name="actionLogout"/>
    </widget>
    <widget class="QMenu" name="menuStatus">
     <property name="title">
@@ -279,17 +279,17 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAddAccount">
    <property name="text">
-    <string>Add Account...</string>
+    <string>Add...</string>
    </property>
   </action>
   <action name="actionAccountInfo">
    <property name="text">
-    <string>Account Info</string>
+    <string>Info</string>
    </property>
   </action>
-  <action name="actionLogout">
+  <action name="actionNew">
    <property name="text">
-    <string>Logout</string>
+    <string>New...</string>
    </property>
   </action>
   <action name="actionConnection">

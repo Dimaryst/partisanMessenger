@@ -5,7 +5,7 @@ import time
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    pass
+    address_family = socket.AF_INET6
 
 
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
@@ -27,7 +27,7 @@ class Queue:
     def start_server(self):
         self.server_thread.start()
         print("Server loop running in thread:", self.server_thread.name)
-        print(f"Server: {self.ip}:{self.port}")
+        print(f"Server: \n[{self.ip}]::{self.port}")
 
     def stop_server(self):
         self.server.shutdown()
@@ -66,7 +66,8 @@ class Server:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((ip, port))
         try:
-            sock.sendall(bytes(message, 'ascii'))
+            sock.sendall(bytes(message, 'utf-8'))
+            print(self)
         finally:
             sock.close()
 
@@ -75,3 +76,26 @@ class Server:
         Prototype
         """
         pass
+
+
+def is_valid_ipv4_address(address):
+    try:
+        socket.inet_pton(socket.AF_INET, address)
+    except AttributeError:  # no inet_pton here, sorry
+        try:
+            socket.inet_aton(address)
+        except socket.error:
+            return False
+        return address.count('.') == 3
+    except socket.error:  # not a valid address
+        return False
+
+    return True
+
+
+def is_valid_ipv6_address(address):
+    try:
+        socket.inet_pton(socket.AF_INET6, address)
+    except socket.error:  # not a valid address
+        return False
+    return True

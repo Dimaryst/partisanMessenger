@@ -10,9 +10,12 @@ from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
 
 from assets.ContactInfoDialog import Ui_DialogContactInfo
-from modules.classes import User, Contact, Message
 from assets.Chat import Ui_PartisanMain
 from assets.AddContact import Ui_DialogAddContact
+from assets.NewAccountDialog import Ui_DialogNewAccount
+
+from modules.classes import User, Contact, Message
+from modules.server import is_valid_ipv6_address, is_valid_ipv4_address
 from PyQt5 import QtWidgets
 
 from modules.server import Server
@@ -27,18 +30,18 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.active_contact = None
         self.centralwidget.setDisabled(True)
         self.actionAccountInfo.setDisabled(True)
-        self.actionLogout.setDisabled(True)
         self.actionConnection.setText("Connection: Offline")
         self.lineInputMessage.setMaxLength(48)
         # Threads
         self.check_connection_thread = CheckConnectionThread(self)  # Thread ping selected contact
-        self.messages_server_thread = MessagesServerThread(self, 'localhost', 41030)  # Incoming messages server
+        self.messages_server_thread = MessagesServerThread(self, 'localhost', 7045)  # Incoming messages server
         #
         self.actionAddAccount.triggered.connect(self.add_account)
-        self.pushButtonAdd.clicked.connect(self.add_contact)
-        self.pushButtonRemove.clicked.connect(self.remove_contact)
+        self.actionNew.triggered.connect(self.new_account)
         self.listContacts.clicked.connect(self.active_dialog)
 
+        self.pushButtonAdd.clicked.connect(self.add_contact)
+        self.pushButtonRemove.clicked.connect(self.remove_contact)
         self.pushButtonClearChat.clicked.connect(self.clear_chat)
         self.pushButtonSendMessage.clicked.connect(self.send_message)
         self.pushButtonConfig.clicked.connect(self.contact_info)
@@ -68,12 +71,21 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 self.load_contact_list()
                 self.actionAddAccount.setDisabled(True)
                 self.lineInputMessage.setDisabled(True)
-                self.pushButtonConfig.setDisabled(True)
                 self.listen()
             else:
                 error_dialog = QtWidgets.QErrorMessage()
                 error_dialog.showMessage('User file missing! Reload it manually.')
                 error_dialog.exec_()
+        else:
+            error_dialog = QtWidgets.QErrorMessage()
+            error_dialog.showMessage('Config file does not exist!')
+            error_dialog.exec_()
+
+    def new_account(self):
+        new_account_form = NewAccountDialog()
+        new_account_form.exec_()
+        if not new_account_form.is_canceled:
+            self.load_session()
 
     def add_account(self):
         path_request = QtWidgets.QFileDialog
@@ -200,6 +212,8 @@ class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
         self.setupUi(self)
         self.labelError.setHidden(True)
         self.is_canceled = True
+        self.lineNickname.setMaxLength(12)
+        self.lineNewContactPort.setMaxLength(5)
         self.pushButtonAdd.clicked.connect(self.add_contact)
         self.pushButtonCancel.clicked.connect(self.cancel)
 
@@ -225,11 +239,68 @@ class EditContactDialog(QtWidgets.QDialog, Ui_DialogContactInfo):
         self.labelError.setHidden(True)
         self.is_canceled = True
         self.contact = contact
+        self.lineEditUuid.setReadOnly(True)
         self.pushButtonCancel.clicked.connect(self.cancel)
         self.lineEditUsername.setText(str(self.contact.contact_nickname))
         self.lineEditUuid.setText(str(self.contact.contact_uuid))
         self.lineEditIp.setText(str(self.contact.contact_ip))
         self.lineEditPort.setText(str(self.contact.contact_port))
+
+    def cancel(self):
+        self.close()
+
+
+class NewAccountDialog(QtWidgets.QDialog, Ui_DialogNewAccount):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.is_canceled = True
+        self.labelError.setHidden(True)
+        self.lineEditUsername.setMaxLength(12)
+        self.lineEditPort.setMaxLength(5)
+        self.lineEditPort.setText("7529")
+        self.pushButtonCreate.clicked.connect(self.create_account)
+        self.pushButtonCancel.clicked.connect(self.cancel)
+
+    def check_password(self):
+        if self.lineEditPassword.text() == self.lineEditPasswordRepeat.text():
+            return True
+        else:
+            return False
+
+    def create_account(self):
+        if (self.lineEditUsername.text() == '') \
+                or (self.lineEditIp.text() == '') \
+                or (self.lineEditPort.text() == ''):
+            self.labelError.setHidden(False)
+            self.labelError.setText("Fields can't be empty")
+        elif not self.check_password():
+            self.labelError.setHidden(False)
+            self.labelError.setText("Check password")
+        elif os.path.exists('user'):
+            error_dialog = QtWidgets.QErrorMessage()
+            error_dialog.setModal(True)
+            error_dialog.showMessage('Folder \'user\' already exist!\n'
+                                     'Add your user card manually or remove folder \'user\' and try again.')
+            error_dialog.exec_()
+            self.close()
+        else:
+            os.mkdir('user')
+            os.mkdir('user/dialogs')
+            New = User()
+            New.new_user(self.lineEditIp.text())
+            New.set_name(self.lineEditUsername.text())
+            New.port = self.lineEditPort.text()
+            print(f"New user:\n{New.ip}:{New.port}\nID: {New.uuid}")
+            with open('config.ini', 'w') as config_file:
+                config_file.write(f"[Session]\nuser={New.uuid}")
+            info_message = QtWidgets.QMessageBox()
+            info_message.setModal(True)
+            info_message.setText('Account has been successfully created.')
+            info_message.exec_()
+
+            self.is_canceled = False
+            self.close()
 
     def cancel(self):
         self.close()
@@ -242,19 +313,26 @@ class CheckConnectionThread(QThread):
         self.contact_ip = 'localhost'
 
     def run(self):
-        self.main_window.labelChatStatus.setText("Connection...")
-        host = ping(self.contact_ip, count=5, interval=0.1, privileged=False)
-        if host.is_alive:
-            self.main_window.labelChatStatus.setText("Online")
-            self.main_window.pushButtonSendMessage.setEnabled(True)
-            self.main_window.lineInputMessage.setEnabled(True)
+        if is_valid_ipv4_address(self.contact_ip) \
+                or is_valid_ipv6_address(self.contact_ip) \
+                or self.contact_ip == "localhost":
+            self.main_window.labelChatStatus.setText("Connection...")
+            host = ping(self.contact_ip, count=5, interval=0.1, privileged=False)
+            if host.is_alive:
+                self.main_window.labelChatStatus.setText("Online")
+                self.main_window.pushButtonSendMessage.setEnabled(True)
+                self.main_window.lineInputMessage.setEnabled(True)
+            else:
+                self.main_window.labelChatStatus.setText("Offline")
+            self.quit()
         else:
-            self.main_window.labelChatStatus.setText("Offline")
-        self.quit()
+            print(self.contact_ip)
+            self.main_window.labelChatStatus.setText("Invalid Address/Port")
 
 
 class MessagesServer(Server):
     def handle(self, message):
+        print(message.decode('utf-8'))
         package = json.loads(message.decode('utf-8'))
         # Load Current User as obj
         config = configparser.ConfigParser()
@@ -281,10 +359,18 @@ class MessagesServerThread(QThread):
         self.port = port
 
     def run(self):
-        server = MessagesServer(self.ip, self.port)
-        server.start_server()
-        server.loop()
-        server.stop_server()
+        if is_valid_ipv4_address(self.ip) or is_valid_ipv6_address(self.ip) or self.ip == "localhost":
+            if 1024 <= self.port <= 65536:
+                server = MessagesServer(self.ip, self.port)
+                server.start_server()
+                server.loop()
+                server.stop_server()
+            else:
+                self.main_window.actionConnection.setText("Connection: Bad Port")
+                self.quit()
+        else:
+            self.main_window.actionConnection.setText("Connection: Bad IP")
+            self.quit()
 
 
 def main():

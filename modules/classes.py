@@ -8,9 +8,10 @@ from datetime import datetime
 
 class User:
     def __init__(self):
+        self.__name = 'self'
         self.uuid = None
         self.ip = None
-        self.port = 41030  # Default Port
+        self.port = 7045  # Default Port
 
     def new_user(self, ip=str, entropy="entropy"):
         uuid = hashlib.sha1()
@@ -75,6 +76,9 @@ class User:
         result = cur.fetchall()
         conn.close()
         return result
+
+    def set_name(self, name):
+        self.__name = name
 
 
 class Contact:
@@ -209,8 +213,8 @@ class Message:
         package = json.dumps(package)  # print("DATA: ", package)  # Ready package to recipient
         print(package)
         try:
-            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-            sock.connect((self.to_contact.contact_ip, self.to_contact.contact_port))
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+            sock.connect((self.to_contact.contact_ip, self.to_contact.contact_port, 0, 0))
             sock.send(package.encode('utf-8'))
         except Exception as e:
             print(f"Failed ({e})")
