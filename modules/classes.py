@@ -106,6 +106,13 @@ class Contact:
         conn.close()
         self.new_database()
 
+    def edit_contact(self, new_username):
+        conn = sqlite3.connect(self.contacts_db_path)
+        cur = conn.cursor()
+        cur.execute(f"UPDATE contacts SET nickname = \'{new_username}\' WHERE uuid = \'{self.contact_uuid}\';")
+        conn.commit()
+        conn.close()
+
     def remove_contact(self, cuuid):
         conn = sqlite3.connect(self.contacts_db_path)
         cur = conn.cursor()
@@ -213,16 +220,16 @@ class Message:
         package = json.dumps(package)
         print("Trying to send to recipient: ", self.to_contact.contact_ip, self.to_contact.contact_port)
         print(package)
-
         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
         try:
-            sock.connect((self.to_contact.contact_ip, self.to_contact.contact_port))
             print("Trying to send to recipient: ", self.to_contact.contact_ip, socket.SOCK_STREAM)
             print(package)
+            sock.connect((self.to_contact.contact_ip, self.to_contact.contact_port))
             sock.send(str(package).encode('utf-8'))
-
+            return True
         except Exception as e:
             print(f"Failed ({e})")
+            return False
         finally:
             sock.close()
 
@@ -234,6 +241,8 @@ class Message:
         hs = hashlib.sha256(str(result).encode('utf-8'))
         hs.update(self.message.encode('utf-8'))
         self.hash = hs.hexdigest()
+        conn.close()
+        # conn_contact = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")
 
     def receive(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.sender.contact_uuid}.db")

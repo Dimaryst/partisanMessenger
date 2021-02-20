@@ -89,7 +89,7 @@ class MessagesServer(Server):
             reply_package = (server_uuid, reply_uuid,
                              f'I got your message! {received_package[2]}', date)
             reply_package = json.dumps(reply_package)
-            
+
             print("Trying to reply:", reply_package)
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             try:

@@ -34,7 +34,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.lineInputMessage.setMaxLength(48)
         # Threads
         self.check_connection_thread = CheckConnectionThread(self)  # Thread ping selected contact
-        self.messages_server_thread = MessagesServerThread(self, 'localhost', 7045)  # Incoming messages server
+        self.messages_server_thread = MessagesServerThread(self, 'localhost', 8090)  # Incoming messages server
         #
         self.actionAddAccount.triggered.connect(self.add_account)
         self.actionNew.triggered.connect(self.new_account)
@@ -97,6 +97,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             self.centralwidget.setEnabled(True)
             with open(self.accountJsonPath, 'r') as account_file:
                 card = json.load(account_file)
+            account_file.close()
             self.account = User()
             self.active_contact = Contact(self.account)
             self.account.uuid, self.account.ip, self.account.port = \
@@ -105,6 +106,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             self.load_contact_list()
             with open('config.ini', 'w') as config_file:
                 config_file.write(f"[Session]\nuser={self.account.uuid}")
+            config_file.close()
             self.actionAddAccount.setDisabled(True)
             self.listen()
 
@@ -149,8 +151,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             info_window = EditContactDialog(self.active_contact)
             info_window.setStyleSheet(qdarkstyle.load_stylesheet())
             info_window.exec_()
-            if not info_window.is_canceled:
-                print("Nice")
+            self.load_contact_list()
 
     def active_dialog(self):
         if self.check_connection_thread.isRunning():
@@ -171,9 +172,14 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 message = Message(self.active_contact, self.account)
                 message.message = self.lineInputMessage.text()
                 message.add_hash()
-                message.save()
                 message.send()
-                self.lineInputMessage.clear()
+                if not message.send():
+                    error_dialog = QtWidgets.QErrorMessage()
+                    error_dialog.showMessage('Failed to send message!\nConnection refused.')
+                    error_dialog.exec_()
+                else:
+                    message.save()
+                    self.lineInputMessage.clear()
                 self.update_messages_list()
         elif self.listContacts.currentRow() == 0:
             self.update_active_contact()
@@ -224,6 +230,7 @@ class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
         self.lineNewContactPort.setMaxLength(5)
         self.pushButtonAdd.clicked.connect(self.add_contact)
         self.pushButtonCancel.clicked.connect(self.cancel)
+        self.pushButtonOpenCard.clicked.connect(self.open_card)
 
     def add_contact(self):
         if (self.lineNickname.text() == '') \
@@ -236,6 +243,20 @@ class AddContactDialog(QtWidgets.QDialog, Ui_DialogAddContact):
             self.is_canceled = False
             self.close()
 
+    def open_card(self):
+        path_request = QtWidgets.QFileDialog
+        options = QtWidgets.QFileDialog.Options()
+        contact_path, _ = path_request.getOpenFileName(self, "Select contact file...", "",
+                                                       "JSON File (*.json)",
+                                                       options=options)
+        if contact_path:
+            with open(contact_path, 'r') as contact_file:
+                card = json.load(contact_file)
+            contact_file.close()
+            self.lineNewContactUuid.setText(str(card['UUID']))
+            self.lineNewContactIp.setText(str(card['IP']))
+            # self.lineNewContactPort(int(card['PORT']))
+
     def cancel(self):
         self.close()
 
@@ -247,12 +268,22 @@ class EditContactDialog(QtWidgets.QDialog, Ui_DialogContactInfo):
         self.labelError.setHidden(True)
         self.is_canceled = True
         self.contact = contact
+        self.lineEditUsername.setMaxLength(12)
         self.lineEditUuid.setReadOnly(True)
+        self.lineEditIp.setReadOnly(True)
+        self.lineEditPort.setReadOnly(True)
+
+        self.pushButtonSave.clicked.connect(self.save)
         self.pushButtonCancel.clicked.connect(self.cancel)
         self.lineEditUsername.setText(str(self.contact.contact_nickname))
         self.lineEditUuid.setText(str(self.contact.contact_uuid))
         self.lineEditIp.setText(str(self.contact.contact_ip))
         self.lineEditPort.setText(str(self.contact.contact_port))
+
+    def save(self):
+        if self.lineEditUsername.text() != '':
+            self.contact.edit_contact(self.lineEditUsername.text())
+        self.close()
 
     def cancel(self):
         self.close()
