@@ -215,8 +215,8 @@ class Message:
         print(package)
 
         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-        sock.connect((self.to_contact.contact_ip, self.to_contact.contact_port))
         try:
+            sock.connect((self.to_contact.contact_ip, self.to_contact.contact_port))
             print("Trying to send to recipient: ", self.to_contact.contact_ip, socket.SOCK_STREAM)
             print(package)
             sock.send(str(package).encode('utf-8'))
