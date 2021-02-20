@@ -164,7 +164,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.update_messages_list()
 
     def send_message(self):
-        if self.listContacts.currentRow() >= 0:
+        if self.listContacts.currentRow() >= 1:
             self.update_active_contact()
             if self.lineInputMessage.text() != '':
                 message = Message(self.active_contact, self.account)
@@ -174,6 +174,13 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 message.send()
                 self.lineInputMessage.clear()
                 self.update_messages_list()
+        elif self.listContacts.currentRow() == 0:
+            self.update_active_contact()
+            message = Message(self.active_contact, self.account)
+            message.message = self.lineInputMessage.text()
+            message.save()
+            self.lineInputMessage.clear()
+            self.update_messages_list()
         else:
             error_dialog = QtWidgets.QErrorMessage()
             error_dialog.showMessage('Dialog is not selected')
