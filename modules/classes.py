@@ -210,14 +210,21 @@ class Message:
 
     def send(self):
         package = (self.sender.uuid, self.to_contact.contact_uuid, self.message, self.date)
-        package = json.dumps(package)  # print("DATA: ", package)  # Ready package to recipient
+        package = json.dumps(package)
+        print("Trying to send to recipient: ", self.to_contact.contact_ip, self.to_contact.contact_port)
         print(package)
+
+        sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        sock.connect((self.to_contact.contact_ip, self.to_contact.contact_port))
         try:
-            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
-            sock.connect((self.to_contact.contact_ip, self.to_contact.contact_port, 0, 0))
-            sock.send(package.encode('utf-8'))
+            print("Trying to send to recipient: ", self.to_contact.contact_ip, socket.SOCK_STREAM)
+            print(package)
+            sock.send(str(package).encode('utf-8'))
+
         except Exception as e:
             print(f"Failed ({e})")
+        finally:
+            sock.close()
 
     def add_hash(self):
         conn = sqlite3.connect(f"user/dialogs/dialog{self.to_contact.contact_uuid}.db")

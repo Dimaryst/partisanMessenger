@@ -11,7 +11,8 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         data = self.request.recv(1024)
-        self.server.queue.add(data)
+        # self.server.queue.add(data)
+        print(f"Received: {data.decode('utf-8')}")
 
 
 class Queue:
@@ -62,15 +63,6 @@ class Server:
             if self.queue.exists():
                 self.handle(self.queue.get())
 
-    def send(self, ip, port, message):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((ip, port))
-        try:
-            sock.sendall(bytes(message, 'utf-8'))
-            print(self)
-        finally:
-            sock.close()
-
     def handle(self, message):
         """
         Prototype
@@ -99,3 +91,4 @@ def is_valid_ipv6_address(address):
     except socket.error:  # not a valid address
         return False
     return True
+
