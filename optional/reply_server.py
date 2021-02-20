@@ -88,11 +88,11 @@ class MessagesServer(Server):
 
             reply_package = (server_uuid, reply_uuid,
                              f'I got your message! {received_package[2]}', date)
-            
+
             print("Trying to reply:", reply_package)
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             try:
-                sock.connect((reply_ip, reply_port))
+                sock.connect((reply_ip, int(reply_port)))
                 print("Trying to send to recipient: ", reply_ip, socket.SOCK_STREAM)
                 print(reply_package)
                 sock.send(str(reply_package).encode('utf-8'))
