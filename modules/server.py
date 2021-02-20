@@ -11,7 +11,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         data = self.request.recv(1024)
-        # self.server.queue.add(data)
+        self.server.queue.add(data)
         print(f"Received: {data.decode('utf-8')}")
 
 

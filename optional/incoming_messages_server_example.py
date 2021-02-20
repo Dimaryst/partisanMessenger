@@ -1,7 +1,9 @@
+import json
 import socket
 import threading
 import socketserver
 import time
+from datetime import datetime
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -11,7 +13,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         data = self.request.recv(1024)
-        # self.server.queue.add(data)
+        self.server.queue.add(data)
         print(f"Received: {data.decode('utf-8')}")
 
 
@@ -72,7 +74,14 @@ class Server:
 
 class MessagesServer(Server):
     def handle(self, message):
+        print(message.sender)
+        date = str(datetime.now())
         print(message.decode('utf-8'))
+        received_package = json.loads(message.decode('utf-8'))
+        sender, recipient, message = received_package[0], received_package[1], received_package[2]
+        reply_message = f"I've receive your message! ({message})"
+        reply_package = (recipient, sender, reply_message, date)
+        # print("Trying to send to recipient: ", recipient_ip, recipient_port)
 
 
 def is_valid_ipv4_address(address):

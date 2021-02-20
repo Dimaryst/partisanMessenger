@@ -13,7 +13,7 @@ date = str(datetime.now())
 
 package = (sender_uuid, recipient_uuid, message, date)
 package = json.dumps(package)
-print("Trying to send to recipient: ", " ", " ")
+print("Trying to send to recipient: ", recipient_ip, recipient_port)
 print(package)
 
 sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)

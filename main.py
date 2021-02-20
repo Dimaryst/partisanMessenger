@@ -153,11 +153,12 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 print("Nice")
 
     def active_dialog(self):
+        if self.check_connection_thread.isRunning():
+            # self.check_connection_thread.quit()
+            self.check_connection_thread.terminate()
         self.update_active_contact()
         self.update_messages_list()
         self.pushButtonSendMessage.setDisabled(True)
-        if self.check_connection_thread.isRunning():
-            self.check_connection_thread.terminate()
         self.lineInputMessage.clear()
         self.check_connection_thread.contact_ip = self.active_contact.contact_ip
         self.check_connection_thread.start()
@@ -326,12 +327,14 @@ class CheckConnectionThread(QThread):
             self.main_window.labelChatStatus.setText("Connection...")
             host = ping(self.contact_ip, count=5, interval=0.1, privileged=False)
             if host.is_alive:
-                self.main_window.labelChatStatus.setText("Online")
+                self.main_window.labelChatStatus.setText("Yggdrasil Online")
                 self.main_window.pushButtonSendMessage.setEnabled(True)
                 self.main_window.lineInputMessage.setEnabled(True)
             else:
-                self.main_window.labelChatStatus.setText("Offline")
+                self.main_window.labelChatStatus.setText("Yggdrasil Offline")
             self.quit()
+            # self.terminate()
+
         else:
             print(self.contact_ip)
             self.main_window.labelChatStatus.setText("Invalid Address/Port")
@@ -350,7 +353,10 @@ class MessagesServer(Server):
 
         receiver = User()  # Current User (same as in ChatWindow)
         receiver.uuid, receiver.ip, receiver.port = card['UUID'], card['IP'], card['PORT']
+
         sender = Contact(receiver)
+
+        print("Sender in contact list:", sender.is_exist(package[0]))
         if sender.is_exist(package[0]) and receiver.uuid == package[1]:
             sender.existing_contact(package[0])
             message = Message(receiver, sender)
