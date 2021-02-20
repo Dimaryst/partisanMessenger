@@ -1,8 +1,10 @@
 import json
+import os
 import socket
 import threading
 import socketserver
 import time
+import configparser
 from datetime import datetime
 
 
@@ -74,14 +76,33 @@ class Server:
 
 class MessagesServer(Server):
     def handle(self, message):
-        print(message.sender)
         date = str(datetime.now())
         print(message.decode('utf-8'))
         received_package = json.loads(message.decode('utf-8'))
-        sender, recipient, message = received_package[0], received_package[1], received_package[2]
-        reply_message = f"I've receive your message! ({message})"
-        reply_package = (recipient, sender, reply_message, date)
-        # print("Trying to send to recipient: ", recipient_ip, recipient_port)
+        if os.path.exists('reply_config.ini'):
+            server_config = configparser.ConfigParser()
+            server_config.read("reply_config.ini")
+            server_uuid = server_config["Server"]["server_uuid"]
+            reply_uuid, reply_ip, reply_port = server_config["Reply"]["uuid"], \
+                                               server_config["Reply"]["ip"], server_config["Reply"]["port"]
+
+            reply_package = (server_uuid, reply_uuid,
+                             f'I got your message! {received_package[2]}', date)
+            
+            print("Trying to reply:", reply_package)
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            try:
+                sock.connect((reply_ip, reply_port))
+                print("Trying to send to recipient: ", reply_ip, socket.SOCK_STREAM)
+                print(reply_package)
+                sock.send(str(reply_package).encode('utf-8'))
+
+            except Exception as e:
+                print(f"Failed ({e})")
+            finally:
+                sock.close()
+        else:
+            print("Configuration not found!")
 
 
 def is_valid_ipv4_address(address):
@@ -128,7 +149,14 @@ def run(ip, port):
 
 
 # Start Server Example
+if os.path.exists('reply_config.ini'):
+    config = configparser.ConfigParser()
+    config.read("reply_config.ini")
+    IP = config["Server"]["server_ip"]
+    PORT = int(config["Server"]["server_port"])
+else:
+    IP = 'localhost'
+    PORT = 8090
 
-IP = 'localhost'
-PORT = 8090
+print(IP, PORT)
 run(IP, PORT)
