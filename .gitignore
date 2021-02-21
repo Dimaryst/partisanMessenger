@@ -127,3 +127,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#
+.DS_Store
+.idea
+# User Folder
+/user
+
+# Config
+config.ini
+notes.ini
+optional/reply_config.ini
