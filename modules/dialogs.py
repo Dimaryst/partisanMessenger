@@ -1,6 +1,8 @@
 import os
 
 from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import QRegExp
+
 from assets.newProfile import Ui_DialogNewProfile
 from assets.newContact import Ui_DialogNewContact
 from modules.classes import Profile, Contact
@@ -44,6 +46,16 @@ class NewContactDialog(QtWidgets.QDialog, Ui_DialogNewContact):
             error_dialog.setWindowModality(QtCore.Qt.ApplicationModal)
             error_dialog.showMessage('This name is already in use!')
             error_dialog.exec_()
+        elif self.lineEditIp.text() == "" or self.lineEditName.text() == "":
+            error_dialog = QtWidgets.QErrorMessage()
+            error_dialog.setWindowModality(QtCore.Qt.ApplicationModal)
+            error_dialog.showMessage('Fields can\'t be empty!')
+            error_dialog.exec_()
+        else:
+            self.newContact.set_ip(self.lineEditIp.text())
+            self.newContact.set_name(self.lineEditName.text())
+            self.newContact.add_contact_to_database()
+            self.close()
 
     def cancel(self):
         self.close()

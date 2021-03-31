@@ -4,7 +4,7 @@ import os
 import configparser
 
 import qdarkstyle
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from icmplib import ping
 from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
@@ -30,6 +30,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.actionCreateNewProfile.triggered.connect(self.create_new_profile)
         self.actionLoadProfile.triggered.connect(self.load_profile)
         self.pushButtonAdd.clicked.connect(self.add_new_contact)
+        self.pushButtonRemove.clicked.connect(self.remove_contact)
 
     def create_new_profile(self):
         new_profile_dialog = NewProfileDialog()
@@ -60,9 +61,33 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
     def add_new_contact(self):
         add_new_contact_dialog = NewContactDialog(self)
         add_new_contact_dialog.exec_()
-        if not add_new_contact_dialog.is_canceled:
-            print(add_new_contact_dialog.lineEditIp.text())
-            self.update_contacts()
+        self.update_contacts()
+
+    def remove_contact(self):
+        if self.listContacts.currentRow() > 0:
+            contact_name = ((self.listContacts.item(self.listContacts.currentRow())).text())
+            selected_contact = Contact(self.currentProfile)
+            selected_contact.load_existing_contact(contact_name)
+
+            confirmation_message = QMessageBox()
+            confirmation_message.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            confirmation_message.setText("Are you sure you want to delete this contact?")
+            confirmation_result = confirmation_message.exec_()
+
+            if QMessageBox.Yes == confirmation_result:
+                selected_contact.remove_contact_from_database()
+                self.update_contacts()
+
+        else:
+            error_dialog = QtWidgets.QErrorMessage()
+            error_dialog.setWindowModality(QtCore.Qt.ApplicationModal)
+            error_dialog.showMessage('This contact can\'t be removed.')
+            error_dialog.exec_()
+
+
+
+    def edit_contact(self):
+        pass
 
 
 def main():

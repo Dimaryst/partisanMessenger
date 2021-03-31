@@ -78,7 +78,7 @@ class Contact:
         conn.commit()
         conn.close()
 
-    def edit_contact(self, new_contact_name, new_contact_ip):
+    def edit_contact_in_database(self, new_contact_name, new_contact_ip):
         conn = sqlite3.connect(self.__contacts_db_path)
         cur = conn.cursor()
         cur.execute(f"UPDATE contacts SET name = \'{new_contact_name}\', ip = \'{new_contact_ip}\' "
@@ -86,10 +86,10 @@ class Contact:
         conn.commit()
         conn.close()
 
-    def remove_contact(self, contact_name):
+    def remove_contact_from_database(self):
         conn = sqlite3.connect(self.__contacts_db_path)
         cur = conn.cursor()
-        cur.execute(f"DELETE FROM contacts WHERE name = \'{contact_name}\';")
+        cur.execute(f"DELETE FROM contacts WHERE name = \'{self.__name}\';")
         conn.commit()
         conn.close()
 
