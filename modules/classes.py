@@ -6,6 +6,17 @@ class Profile:
     def __init__(self, ip):
         self.__ip = ip
 
+    @staticmethod
+    def get_existing_profile(database_path):
+        conn = sqlite3.connect(database_path)
+        cur = conn.cursor()
+        cur.execute(f"SELECT * FROM contacts WHERE id = 0;")
+        result = cur.fetchone()
+        conn.close()
+        print(result)
+        profile = Profile(result[1])
+        return profile
+
     def new_contact_list(self):
         self_as_contact = (0, self.__ip, "Me")
         database_name = self.__ip.replace(":", "")
@@ -21,11 +32,13 @@ class Profile:
         conn.close()
 
     def get_contacts(self):
-        conn = sqlite3.connect(f"profile/{self.__ip}.db")
+        database_name = self.__ip.replace(":", "")
+        conn = sqlite3.connect(f"profile/{database_name}.db")
         cur = conn.cursor()
         cur.execute(f"SELECT * FROM contacts;")
         result = cur.fetchall()
         conn.close()
+        print(result)
         return result
 
     def get_profile_ip(self):
@@ -37,7 +50,8 @@ class Contact:
         self.profile = profile
         self.__ip = None
         self.__name = None
-        self.__contacts_db_path = f"user/contacts.db"
+        self.database_name = self.profile.get_profile_ip().replace(":", "")
+        self.__contacts_db_path = f"profile/{self.database_name}.db"
 
     def set_ip(self, ip):
         self.__ip = ip
@@ -54,7 +68,7 @@ class Contact:
         self.__name = request_result[2]
         conn.close()
 
-    def add_new_contact(self):
+    def add_contact_to_database(self):
         conn = sqlite3.connect(self.__contacts_db_path)
         cur = conn.cursor()
         new_contact = (self.__ip, self.__name)
@@ -79,13 +93,16 @@ class Contact:
         conn.commit()
         conn.close()
 
-    def is_exist(self, contact_name):
+    def is_exist(self, name):
         conn = sqlite3.connect(self.__contacts_db_path)
         cur = conn.cursor()
-        cur.execute(f"SELECT * FROM contacts WHERE name = \'{contact_name}\';")
+        cur.execute(f"SELECT * FROM contacts WHERE name = \'{name}\';")
         request_result = cur.fetchone()
-        if request_result != '':
+        # print(request_result)
+        if request_result != '' and request_result is not None:
             return True
         else:
             return False
+
+
 
