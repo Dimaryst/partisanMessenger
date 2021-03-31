@@ -9,14 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1012</width>
-    <height>600</height>
+    <width>600</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>900</width>
-    <height>600</height>
+    <width>600</width>
+    <height>400</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -31,8 +31,8 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayoutContacts">
-      <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
        <widget class="QLabel" name="labelContactList">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -41,14 +41,14 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Contact List</string>
+         <string>Contacts</string>
         </property>
         <property name="textInteractionFlags">
          <set>Qt::LinksAccessibleByMouse</set>
         </property>
        </widget>
       </item>
-      <item>
+      <item row="1" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QPushButton" name="pushButtonAdd">
@@ -78,7 +78,7 @@
         </item>
        </layout>
       </item>
-      <item>
+      <item row="2" column="0">
        <widget class="QListWidget" name="listContacts">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -88,13 +88,13 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>340</width>
+          <width>120</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>460</width>
+          <width>200</width>
           <height>16777215</height>
          </size>
         </property>
@@ -162,92 +162,6 @@
       </item>
      </layout>
     </item>
-    <item>
-     <widget class="Line" name="line">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QLabel" name="labelChat">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>140</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Chat</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="labelChatStatus">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButtonUpdateListMessages">
-        <property name="text">
-         <string>Update Messages</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButtonClearChat">
-        <property name="text">
-         <string>Clear Chat</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButtonConfig">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -255,26 +169,19 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1012</width>
+     <width>600</width>
      <height>24</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuAccount">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>Account</string>
+     <string>File</string>
     </property>
-    <addaction name="actionNew"/>
-    <addaction name="actionAddAccount"/>
-    <addaction name="actionAccountInfo"/>
+    <addaction name="actionLoadContacts"/>
+    <addaction name="actionNewContactsDatabase"/>
+    <addaction name="actionConntection"/>
    </widget>
-   <widget class="QMenu" name="menuStatus">
-    <property name="title">
-     <string>Status</string>
-    </property>
-    <addaction name="actionConnection"/>
-   </widget>
-   <addaction name="menuAccount"/>
-   <addaction name="menuStatus"/>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAddAccount">
@@ -292,9 +199,19 @@
     <string>New...</string>
    </property>
   </action>
-  <action name="actionConnection">
+  <action name="actionLoadContacts">
    <property name="text">
-    <string>Connection</string>
+    <string>Load Contacts...</string>
+   </property>
+  </action>
+  <action name="actionNewContactsDatabase">
+   <property name="text">
+    <string>New Contacts Database...</string>
+   </property>
+  </action>
+  <action name="actionConntection">
+   <property name="text">
+    <string>Connection...</string>
    </property>
   </action>
  </widget>

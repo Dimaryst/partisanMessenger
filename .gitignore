@@ -138,3 +138,6 @@ dmypy.json
 config.ini
 notes.ini
 optional/reply_config.ini
+
+# Old
+old

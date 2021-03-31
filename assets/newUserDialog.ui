@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogContactInfo</class>
- <widget class="QDialog" name="DialogContactInfo">
+ <class>DialogNewUser</class>
+ <widget class="QDialog" name="DialogNewUser">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -9,40 +9,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
-    <height>240</height>
+    <width>360</width>
+    <height>180</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>480</width>
-    <height>240</height>
+    <width>320</width>
+    <height>160</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>480</width>
-    <height>240</height>
+    <width>360</width>
+    <height>180</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>Contact</string>
+   <string>New Account</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QLineEdit" name="lineEditUsername">
-     <property name="placeholderText">
-      <string>Nickname</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="lineEditUuid">
-     <property name="placeholderText">
-      <string>UUID</string>
-     </property>
-    </widget>
-   </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayoutIp">
      <item>
@@ -53,35 +39,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEditIp"/>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutPort">
-     <item>
-      <widget class="QLabel" name="labelPort">
+      <widget class="QLineEdit" name="lineEditIp">
        <property name="text">
-        <string>Default Port:</string>
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string/>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="lineEditPort"/>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutInterval">
-     <item>
-      <widget class="QLabel" name="labelInterval">
-       <property name="text">
-        <string>Connection interval (seconds):</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="lineEditInterval"/>
      </item>
     </layout>
    </item>
@@ -95,9 +60,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonSave">
+      <widget class="QPushButton" name="pushButtonCreate">
        <property name="text">
-        <string>Save</string>
+        <string>Create</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -107,7 +75,7 @@
         <string>Cancel</string>
        </property>
        <property name="default">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
