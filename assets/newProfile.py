@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'newUserDialog.ui'
+# Form implementation generated from reading ui file 'newProfile.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #
@@ -11,21 +11,21 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_DialogNewUser(object):
-    def setupUi(self, DialogNewUser):
-        DialogNewUser.setObjectName("DialogNewUser")
-        DialogNewUser.setWindowModality(QtCore.Qt.ApplicationModal)
-        DialogNewUser.resize(360, 180)
-        DialogNewUser.setMinimumSize(QtCore.QSize(320, 160))
-        DialogNewUser.setMaximumSize(QtCore.QSize(360, 180))
-        self.verticalLayout = QtWidgets.QVBoxLayout(DialogNewUser)
+class Ui_DialogNewProfile(object):
+    def setupUi(self, DialogNewProfile):
+        DialogNewProfile.setObjectName("DialogNewProfile")
+        DialogNewProfile.setWindowModality(QtCore.Qt.ApplicationModal)
+        DialogNewProfile.resize(360, 180)
+        DialogNewProfile.setMinimumSize(QtCore.QSize(320, 160))
+        DialogNewProfile.setMaximumSize(QtCore.QSize(360, 180))
+        self.verticalLayout = QtWidgets.QVBoxLayout(DialogNewProfile)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayoutIp = QtWidgets.QHBoxLayout()
         self.horizontalLayoutIp.setObjectName("horizontalLayoutIp")
-        self.labelIp = QtWidgets.QLabel(DialogNewUser)
+        self.labelIp = QtWidgets.QLabel(DialogNewProfile)
         self.labelIp.setObjectName("labelIp")
         self.horizontalLayoutIp.addWidget(self.labelIp)
-        self.lineEditIp = QtWidgets.QLineEdit(DialogNewUser)
+        self.lineEditIp = QtWidgets.QLineEdit(DialogNewProfile)
         self.lineEditIp.setText("")
         self.lineEditIp.setPlaceholderText("")
         self.lineEditIp.setObjectName("lineEditIp")
@@ -33,26 +33,26 @@ class Ui_DialogNewUser(object):
         self.verticalLayout.addLayout(self.horizontalLayoutIp)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.labelError = QtWidgets.QLabel(DialogNewUser)
+        self.labelError = QtWidgets.QLabel(DialogNewProfile)
         self.labelError.setObjectName("labelError")
         self.horizontalLayout.addWidget(self.labelError)
-        self.pushButtonCreate = QtWidgets.QPushButton(DialogNewUser)
+        self.pushButtonCreate = QtWidgets.QPushButton(DialogNewProfile)
         self.pushButtonCreate.setDefault(True)
         self.pushButtonCreate.setObjectName("pushButtonCreate")
         self.horizontalLayout.addWidget(self.pushButtonCreate)
-        self.pushButtonCancel = QtWidgets.QPushButton(DialogNewUser)
+        self.pushButtonCancel = QtWidgets.QPushButton(DialogNewProfile)
         self.pushButtonCancel.setDefault(False)
         self.pushButtonCancel.setObjectName("pushButtonCancel")
         self.horizontalLayout.addWidget(self.pushButtonCancel)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.retranslateUi(DialogNewUser)
-        QtCore.QMetaObject.connectSlotsByName(DialogNewUser)
+        self.retranslateUi(DialogNewProfile)
+        QtCore.QMetaObject.connectSlotsByName(DialogNewProfile)
 
-    def retranslateUi(self, DialogNewUser):
+    def retranslateUi(self, DialogNewProfile):
         _translate = QtCore.QCoreApplication.translate
-        DialogNewUser.setWindowTitle(_translate("DialogNewUser", "New Account"))
-        self.labelIp.setText(_translate("DialogNewUser", "IP:"))
-        self.labelError.setText(_translate("DialogNewUser", "Error (!)"))
-        self.pushButtonCreate.setText(_translate("DialogNewUser", "Create"))
-        self.pushButtonCancel.setText(_translate("DialogNewUser", "Cancel"))
+        DialogNewProfile.setWindowTitle(_translate("DialogNewProfile", "New Account"))
+        self.labelIp.setText(_translate("DialogNewProfile", "IP:"))
+        self.labelError.setText(_translate("DialogNewProfile", "Error (!)"))
+        self.pushButtonCreate.setText(_translate("DialogNewProfile", "Create"))
+        self.pushButtonCancel.setText(_translate("DialogNewProfile", "Cancel"))

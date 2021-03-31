@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'chatLite.ui'
+# Form implementation generated from reading ui file 'chat.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #
@@ -109,21 +109,15 @@ class Ui_PartisanMain(object):
         self.statusbar = QtWidgets.QStatusBar(PartisanMain)
         self.statusbar.setObjectName("statusbar")
         PartisanMain.setStatusBar(self.statusbar)
-        self.actionAddAccount = QtWidgets.QAction(PartisanMain)
-        self.actionAddAccount.setObjectName("actionAddAccount")
-        self.actionAccountInfo = QtWidgets.QAction(PartisanMain)
-        self.actionAccountInfo.setObjectName("actionAccountInfo")
-        self.actionNew = QtWidgets.QAction(PartisanMain)
-        self.actionNew.setObjectName("actionNew")
-        self.actionLoadContacts = QtWidgets.QAction(PartisanMain)
-        self.actionLoadContacts.setObjectName("actionLoadContacts")
-        self.actionNewContactsDatabase = QtWidgets.QAction(PartisanMain)
-        self.actionNewContactsDatabase.setObjectName("actionNewContactsDatabase")
-        self.actionConntection = QtWidgets.QAction(PartisanMain)
-        self.actionConntection.setObjectName("actionConntection")
-        self.menuFile.addAction(self.actionLoadContacts)
-        self.menuFile.addAction(self.actionNewContactsDatabase)
-        self.menuFile.addAction(self.actionConntection)
+        self.actionLoadProfile = QtWidgets.QAction(PartisanMain)
+        self.actionLoadProfile.setObjectName("actionLoadProfile")
+        self.actionCreateNewProfile = QtWidgets.QAction(PartisanMain)
+        self.actionCreateNewProfile.setObjectName("actionCreateNewProfile")
+        self.actionConnection = QtWidgets.QAction(PartisanMain)
+        self.actionConnection.setObjectName("actionConnection")
+        self.menuFile.addAction(self.actionLoadProfile)
+        self.menuFile.addAction(self.actionCreateNewProfile)
+        self.menuFile.addAction(self.actionConnection)
         self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(PartisanMain)
@@ -137,9 +131,6 @@ class Ui_PartisanMain(object):
         self.pushButtonRemove.setText(_translate("PartisanMain", "Remove"))
         self.pushButtonSendMessage.setText(_translate("PartisanMain", "Send"))
         self.menuFile.setTitle(_translate("PartisanMain", "File"))
-        self.actionAddAccount.setText(_translate("PartisanMain", "Add..."))
-        self.actionAccountInfo.setText(_translate("PartisanMain", "Info"))
-        self.actionNew.setText(_translate("PartisanMain", "New..."))
-        self.actionLoadContacts.setText(_translate("PartisanMain", "Load Contacts..."))
-        self.actionNewContactsDatabase.setText(_translate("PartisanMain", "New Contacts Database..."))
-        self.actionConntection.setText(_translate("PartisanMain", "Connection..."))
+        self.actionLoadProfile.setText(_translate("PartisanMain", "Load Profile..."))
+        self.actionCreateNewProfile.setText(_translate("PartisanMain", "Create New Profile..."))
+        self.actionConnection.setText(_translate("PartisanMain", "Connection..."))

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogNewUser</class>
- <widget class="QDialog" name="DialogNewUser">
+ <class>DialogNewProfile</class>
+ <widget class="QDialog" name="DialogNewProfile">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>

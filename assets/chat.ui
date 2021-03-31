@@ -177,39 +177,24 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionLoadContacts"/>
-    <addaction name="actionNewContactsDatabase"/>
-    <addaction name="actionConntection"/>
+    <addaction name="actionLoadProfile"/>
+    <addaction name="actionCreateNewProfile"/>
+    <addaction name="actionConnection"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionAddAccount">
+  <action name="actionLoadProfile">
    <property name="text">
-    <string>Add...</string>
+    <string>Load Profile...</string>
    </property>
   </action>
-  <action name="actionAccountInfo">
+  <action name="actionCreateNewProfile">
    <property name="text">
-    <string>Info</string>
+    <string>Create New Profile...</string>
    </property>
   </action>
-  <action name="actionNew">
-   <property name="text">
-    <string>New...</string>
-   </property>
-  </action>
-  <action name="actionLoadContacts">
-   <property name="text">
-    <string>Load Contacts...</string>
-   </property>
-  </action>
-  <action name="actionNewContactsDatabase">
-   <property name="text">
-    <string>New Contacts Database...</string>
-   </property>
-  </action>
-  <action name="actionConntection">
+  <action name="actionConnection">
    <property name="text">
     <string>Connection...</string>
    </property>
