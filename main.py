@@ -32,13 +32,11 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
     def create_new_profile(self):
         new_profile_dialog = NewProfileDialog()
         new_profile_dialog.exec_()
-        if not new_profile_dialog.is_canceled:
-            print(f"Profile updated: {self.currentProfile.get_profile_ip()}")
+        print(self.currentProfile)
 
     def load_profile(self):
         profile_database_path_request = QtWidgets.QFileDialog
         options = QtWidgets.QFileDialog.Options()
-
         self.currentProfileDatabasePath, _ = \
             profile_database_path_request.getOpenFileName(self, "Select profile database...", "",
                                                           "Database File (*.db)",

@@ -31,6 +31,7 @@ class NewProfileDialog(QtWidgets.QDialog, Ui_DialogNewProfile):
         print(f"New profile IP: {self.lineEditIp.text()}")
         new_profile = Profile(self.lineEditIp.text())
         new_profile.new_contact_list()
+        self.is_canceled = False
         self.close()
 
     def cancel(self):
@@ -60,10 +61,11 @@ class NewContactDialog(QtWidgets.QDialog, Ui_DialogNewContact):
         self.pushButtonCancel.clicked.connect(self.cancel)
 
     def add_new_contact(self):
-        if self.newContact.is_exist(self.lineEditName.text()):
+        if self.newContact.is_exist_name(self.lineEditName.text()) or \
+                self.newContact.is_exist_ip(self.lineEditIp.text()):
             error_dialog = QtWidgets.QErrorMessage()
             error_dialog.setWindowModality(QtCore.Qt.ApplicationModal)
-            error_dialog.showMessage('This name is already in use!')
+            error_dialog.showMessage('This name or IP is already in use!')
             error_dialog.exec_()
         elif self.lineEditIp.text() == "" or self.lineEditName.text() == "":
             error_dialog = QtWidgets.QErrorMessage()

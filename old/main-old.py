@@ -387,8 +387,8 @@ class MessagesServer(Server):
 
         sender = Contact(receiver)
 
-        print("Sender in contact list:", sender.is_exist(package[0]))
-        if sender.is_exist(package[0]) and receiver.uuid == package[1]:
+        print("Sender in contact list:", sender.is_exist_name(package[0]))
+        if sender.is_exist_name(package[0]) and receiver.uuid == package[1]:
             sender.existing_contact(package[0])
             message = Message(receiver, sender)
             message.load(package)

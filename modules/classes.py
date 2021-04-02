@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from datetime import datetime
 
@@ -20,16 +21,20 @@ class Profile:
     def new_contact_list(self):
         self_as_contact = (0, self.__ip, "Me")
         database_name = self.__ip.replace(":", "")
-        conn = sqlite3.connect(f"profile/{database_name}.db")
-        cur = conn.cursor()
-        cur.execute("""CREATE TABLE IF NOT EXISTS contacts(
-               id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-               ip TEXT,
-               name TEXT);""")
-        cur.execute("INSERT INTO contacts(id,ip,name)"
-                    "VALUES(?, ?, ?);", self_as_contact)
-        conn.commit()
-        conn.close()
+        if not os.path.exists(f'profile/{database_name}.db'):
+            conn = sqlite3.connect(f"profile/{database_name}.db")
+            cur = conn.cursor()
+            cur.execute("""CREATE TABLE IF NOT EXISTS contacts(
+                           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                           ip TEXT,
+                           name TEXT);""")
+            cur.execute("INSERT INTO contacts(id,ip,name)"
+                        "VALUES(?, ?, ?);", self_as_contact)
+            conn.commit()
+            conn.close()
+
+        else:
+            print(f"Database {database_name} already exists.")
 
     def get_contacts(self):
         database_name = self.__ip.replace(":", "")
@@ -93,16 +98,26 @@ class Contact:
         conn.commit()
         conn.close()
 
-    def is_exist(self, name):
+    def is_exist_name(self, name):
         conn = sqlite3.connect(self.__contacts_db_path)
         cur = conn.cursor()
         cur.execute(f"SELECT * FROM contacts WHERE name = \'{name}\';")
-        request_result = cur.fetchone()
-        # print(request_result)
-        if request_result != '' and request_result is not None:
+        request_name_result = cur.fetchone()
+        print("Name in DB", request_name_result)
+        conn.close()
+        if request_name_result != '' and request_name_result is not None:
             return True
         else:
             return False
 
-
-
+    def is_exist_ip(self, ip):
+        conn = sqlite3.connect(self.__contacts_db_path)
+        cur = conn.cursor()
+        cur.execute(f"SELECT * FROM contacts WHERE ip = \'{ip}\';")
+        request_ip_result = cur.fetchone()
+        print("IP in DB", request_ip_result)
+        conn.close()
+        if request_ip_result != '' and request_ip_result is not None:
+            return True
+        else:
+            return False
