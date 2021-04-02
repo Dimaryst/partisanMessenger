@@ -8,10 +8,7 @@ from PyQt5 import QtWidgets, QtCore
 from icmplib import ping
 from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QMessageBox
-import modules.classes
 from assets.chat import Ui_PartisanMain
-from assets.newProfile import Ui_DialogNewProfile
-from assets.newContact import Ui_DialogNewContact
 from modules.classes import Profile, Contact
 from modules.dialogs import NewProfileDialog, NewContactDialog
 from modules.server import Server
@@ -83,8 +80,6 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             error_dialog.setWindowModality(QtCore.Qt.ApplicationModal)
             error_dialog.showMessage('This contact can\'t be removed.')
             error_dialog.exec_()
-
-
 
     def edit_contact(self):
         pass

@@ -2,6 +2,7 @@ import os
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QRegExp
+from PyQt5.QtGui import QRegExpValidator
 
 from assets.newProfile import Ui_DialogNewProfile
 from assets.newContact import Ui_DialogNewContact
@@ -16,6 +17,13 @@ class NewProfileDialog(QtWidgets.QDialog, Ui_DialogNewProfile):
         self.labelError.setHidden(True)
         self.pushButtonCreate.clicked.connect(self.create_profile)
         self.pushButtonCancel.clicked.connect(self.cancel)
+
+        rx_ipv6 = QRegExp("([0-9a-fA-F]{0,4}\:[0-9a-fA-F]{0,4}\:"
+                          "[0-9a-fA-F]{0,4}\:[0-9a-fA-F]{0,4}\:"
+                          "[0-9a-fA-F]{0,4}\:[0-9a-fA-F]{0,4}\:"
+                          "[0-9a-fA-F]{0,4}\:[0-9a-fA-F]{0,4})")
+
+        self.lineEditIp.setValidator(QRegExpValidator(rx_ipv6))
 
     def create_profile(self):
         if not os.path.exists("profile"):
@@ -35,6 +43,17 @@ class NewContactDialog(QtWidgets.QDialog, Ui_DialogNewContact):
         self.setupUi(self)
         self.main_window = main_window
         self.is_canceled = True
+
+        #
+        rx_name = QRegExp('\w{0,16}')
+        rx_ipv6 = QRegExp("([0-9a-fA-F]{0,4}\:[0-9a-fA-F]{0,4}\:"
+                          "[0-9a-fA-F]{0,4}\:[0-9a-fA-F]{0,4}\:"
+                          "[0-9a-fA-F]{0,4}\:[0-9a-fA-F]{0,4}\:"
+                          "[0-9a-fA-F]{0,4}\:[0-9a-fA-F]{0,4})")
+
+        self.lineEditIp.setValidator(QRegExpValidator(rx_ipv6))
+        self.lineEditName.setValidator(QRegExpValidator(rx_name))
+
         self.labelError.setHidden(True)
         self.newContact = Contact(self.main_window.currentProfile)
         self.pushButtonAdd.clicked.connect(self.add_new_contact)

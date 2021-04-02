@@ -15,9 +15,9 @@ class Ui_DialogNewContact(object):
     def setupUi(self, DialogNewContact):
         DialogNewContact.setObjectName("DialogNewContact")
         DialogNewContact.setWindowModality(QtCore.Qt.ApplicationModal)
-        DialogNewContact.resize(360, 180)
-        DialogNewContact.setMinimumSize(QtCore.QSize(320, 160))
-        DialogNewContact.setMaximumSize(QtCore.QSize(360, 180))
+        DialogNewContact.resize(420, 160)
+        DialogNewContact.setMinimumSize(QtCore.QSize(400, 160))
+        DialogNewContact.setMaximumSize(QtCore.QSize(420, 180))
         self.verticalLayout = QtWidgets.QVBoxLayout(DialogNewContact)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayoutIp = QtWidgets.QHBoxLayout()

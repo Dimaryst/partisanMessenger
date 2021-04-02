@@ -15,9 +15,9 @@ class Ui_DialogNewProfile(object):
     def setupUi(self, DialogNewProfile):
         DialogNewProfile.setObjectName("DialogNewProfile")
         DialogNewProfile.setWindowModality(QtCore.Qt.ApplicationModal)
-        DialogNewProfile.resize(360, 180)
-        DialogNewProfile.setMinimumSize(QtCore.QSize(320, 160))
-        DialogNewProfile.setMaximumSize(QtCore.QSize(360, 180))
+        DialogNewProfile.resize(360, 120)
+        DialogNewProfile.setMinimumSize(QtCore.QSize(320, 120))
+        DialogNewProfile.setMaximumSize(QtCore.QSize(360, 140))
         self.verticalLayout = QtWidgets.QVBoxLayout(DialogNewProfile)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayoutIp = QtWidgets.QHBoxLayout()
@@ -51,7 +51,7 @@ class Ui_DialogNewProfile(object):
 
     def retranslateUi(self, DialogNewProfile):
         _translate = QtCore.QCoreApplication.translate
-        DialogNewProfile.setWindowTitle(_translate("DialogNewProfile", "New Account"))
+        DialogNewProfile.setWindowTitle(_translate("DialogNewProfile", "New Profile"))
         self.labelIp.setText(_translate("DialogNewProfile", "IP:"))
         self.labelError.setText(_translate("DialogNewProfile", "Error (!)"))
         self.pushButtonCreate.setText(_translate("DialogNewProfile", "Create"))

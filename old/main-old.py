@@ -14,7 +14,7 @@ from assets.Chat import Ui_PartisanMain
 from assets.AddContact import Ui_DialogAddContact
 from assets.NewAccountDialog import Ui_DialogNewAccount
 
-from modules.classes import User, Contact, Message
+from modules.classes import Profile, Contact, Message
 from modules.server import is_valid_ipv6_address, is_valid_ipv4_address
 from PyQt5 import QtWidgets
 
@@ -49,7 +49,7 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
         self.load_session()  # Load user from config and json
 
     def listen(self):
-        self.messages_server_thread.ip = self.account.ip
+        self.messages_server_thread.ip = self.account.__ip
         self.messages_server_thread.port = self.account.port
         self.messages_server_thread.start()
         self.actionConnection.setText("Connection: OK")
@@ -63,9 +63,9 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
                 with open(f"user/{user}.json", 'r') as account_file:
                     card = json.load(account_file)
                     # self.setWindowTitle(f"Partisan - Messenger - user/{user}.json")
-                self.account = User()
+                self.account = Profile()
                 self.active_contact = Contact(self.account)
-                self.account.uuid, self.account.ip, self.account.port = \
+                self.account.uuid, self.account.__ip, self.account.port = \
                     card['UUID'], card['IP'], card['PORT']
                 self.centralwidget.setEnabled(True)
                 self.load_contact_list()
@@ -98,9 +98,9 @@ class ChatWindow(QtWidgets.QMainWindow, Ui_PartisanMain):
             with open(self.accountJsonPath, 'r') as account_file:
                 card = json.load(account_file)
             account_file.close()
-            self.account = User()
+            self.account = Profile()
             self.active_contact = Contact(self.account)
-            self.account.uuid, self.account.ip, self.account.port = \
+            self.account.uuid, self.account.__ip, self.account.port = \
                 card['UUID'], card['IP'], card['PORT']
             self.centralwidget.setEnabled(True)
             self.load_contact_list()
@@ -326,11 +326,11 @@ class NewAccountDialog(QtWidgets.QDialog, Ui_DialogNewAccount):
         else:
             os.mkdir('user')
             os.mkdir('user/dialogs')
-            New = User()
+            New = Profile()
             New.new_user(self.lineEditIp.text())
             New.set_name(self.lineEditUsername.text())
             New.port = self.lineEditPort.text()
-            print(f"New user:\n{New.ip}:{New.port}\nID: {New.uuid}")
+            print(f"New user:\n{New.__ip}:{New.port}\nID: {New.uuid}")
             with open('config.ini', 'w') as config_file:
                 config_file.write(f"[Session]\nuser={New.uuid}")
             info_message = QtWidgets.QMessageBox()
@@ -382,8 +382,8 @@ class MessagesServer(Server):
         with open(f"user/{user}.json", 'r') as account_file:
             card = json.load(account_file)
 
-        receiver = User()  # Current User (same as in ChatWindow)
-        receiver.uuid, receiver.ip, receiver.port = card['UUID'], card['IP'], card['PORT']
+        receiver = Profile()  # Current User (same as in ChatWindow)
+        receiver.uuid, receiver.__ip, receiver.port = card['UUID'], card['IP'], card['PORT']
 
         sender = Contact(receiver)
 
